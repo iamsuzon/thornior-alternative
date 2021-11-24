@@ -1,0 +1,637 @@
+//*===== header css start ====*//
+header {
+    .header-main {
+        .header-item {
+            .header-top {
+                padding: 20px 0;
+                .top-item {
+                    position: relative;
+                    @extend %flex;
+                    align-items: center;
+                    justify-content: center;
+                    @include breakpoint (lg) {
+                        justify-content: space-between;
+                    }
+                    .top-search {
+                        i {
+                            cursor: pointer;
+                            color: $theme-color;
+                        }
+                    }
+                    .top-logo {
+                        position: absolute;
+                        left: 50%;
+                        top: 50%;
+                        display: none;
+                        transform: translate(-50%, -50%);
+                        @include breakpoint (lg) {
+                            display: block;
+                        }
+                        a {
+                            img {
+                                height: 60px;
+                            }
+                        }
+                    }
+                    .top-menu {
+                        ul.top-list {
+                            margin: 0;
+                            padding: 0;
+                            list-style: none;
+                            @extend %flex;
+                            align-items: center;
+                            li {
+                                margin: 0 5px;
+                                @include breakpoint (sm) {
+                                    margin: 0 10px;
+                                }
+                                &:last-child {
+                                    margin-right: 0;
+                                    button {
+                                        position: relative;
+                                        &::after {
+                                            position: absolute;
+                                            content: '3';
+                                            top: -5px;
+                                            right: -10px;
+                                            font-size: 10px;
+                                            height: 15px;
+                                            width: 15px;
+                                            line-height: 15px;
+                                            text-align: center;
+                                            color: $white-color;
+                                            border-radius: 100%;
+                                            background: #635858;
+                                        }
+                                    }
+                                }
+                                select {
+                                    cursor: pointer;
+                                    border: 0;
+                                    option {
+                                        color: $theme-color;
+                                    }
+                                    &:focus {
+                                        box-shadow: none;
+                                    }
+                                }
+                                a {
+                                    color: $theme-color;
+                                    display: inline-block;
+                                    text-decoration: none;
+                                }
+                                button {
+                                    background: transparent;
+                                    i {
+                                        color: $theme-color;
+                                    }
+                                    &:focus {
+                                        outline: 0;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            .header-bottom {
+                margin-bottom: 20px;
+                .bottom-inner {
+                    @extend %flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    position: relative;
+                    padding: 10px 0;
+                    @include breakpoint (lg) {
+                        justify-content: center;
+                    }
+                    .header-logo {
+                        a {
+                            img {
+                                height: 60px;
+                            }
+                        }
+                    }
+                    .main-menu {
+                        @include breakpoint (max-lg) {
+                            position: fixed;
+                            width: 300px;
+                            height: calc(100vh - 0px);
+                            left : -300px;
+                            top: 0;
+                            padding-left: 20px;
+                            overflow-y: scroll;
+                            opacity: 0.95;
+                            background-color: $primary-color;
+                            z-index: 999;
+                            transition: all 0.3s ease-in-out;
+                            &.active {
+                                left: 0;
+                            }
+                        }
+                        .crose-menu {
+                            display: none;
+                            @include breakpoint (max-lg) {
+                                padding: 20px 10px 40px;
+                                display: block;
+                            }
+                            i {
+                                float: right;
+                                font-size: 25px;
+                                cursor: pointer;
+                                color: $white-color;
+                            }
+                        }
+                        ul.menu-list {
+                            margin: 0;
+                            padding: 0;
+                            display: block;
+                            list-style: none;
+                            @include breakpoint (lg) {
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                            }
+                            li {
+                                margin: 5px 0;
+                                @include breakpoint (lg) {
+                                    margin: 0 5px;
+                                }
+                                &.active {
+                                    a {
+                                        color: #635858;
+                                    }
+                                }
+                                &.open {
+                                    .sub-menu {
+                                        ul.drop-list {
+                                            
+                                        }
+                                    }
+                                }
+                                &:hover {
+                                    .sub-menu {
+                                        opacity: 1;
+                                        transform: translateY(0);
+                                        visibility: visible;
+                                    }
+                                }
+                                a {
+                                    color: $white-color;
+                                    padding: 5px 10px;
+                                    display: inline-block;
+                                    text-decoration: none;
+                                    @include breakpoint (lg) {
+                                        color: $theme-color;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    .mobile-bar {
+                        display: block;  
+                        height: 40px;
+                        width: 40px;
+                        line-height: 40px;
+                        position: relative;
+                        margin: 0 15px;
+                        @include breakpoint (lg) {
+                            display: none;
+                        }
+                        &.active { 
+                            opacity: 1;
+                            span {
+                                &:nth-child(1) {
+                                    transform: translate(-100%, -50%) rotate(45deg);
+                                    margin-right: 0px;
+                                }
+                                &:nth-child(2) {
+                                    margin: 3px 0px;
+                                    transform: translate(-70%, -50%) rotate(-45deg);
+                                }
+                                &:nth-child(3) {
+                                    transform: translate(-70%, -50%) rotate(45deg);
+                                    top: 26px;
+                                }
+                            }
+                        }
+                        span{
+                            position: absolute;
+                            top: 50%;
+                            left: 50%;
+                            width: 30px;
+                            height: 4px;
+                            z-index: 1;
+                            border-radius: 4px;
+                            background: $theme-color;
+                            transform: translate(-50%, -50%);
+                            transition: all .3s ease;
+                            &:nth-child(1) {
+                                width: 14px;
+                                margin-top: 8px;
+                                margin-left: 8px;
+                            }
+                            &:nth-child(3) {
+                                width: 14px;
+                                margin-top: -9px;
+                                margin-left: -8px;
+                            }
+                        }
+                    }
+                    }  
+            }
+            &.style-one {
+                .header-bottom {
+                    background: #d8b65269;
+                }
+            }
+        }
+    }
+}
+
+// common for all sub-menu
+.sub-menu {
+    @include breakpoint (lg) {
+        position: absolute;
+        top: 100%;
+        background: #ffffff;
+        padding: 5px 0;
+        transform: translateY(35px);
+        opacity: 0;
+        visibility: hidden;
+        transition: all ease 0.3s;
+        z-index: 111;
+        box-shadow: 0 0 10px rgba(0, 0, 0, .18);
+    }
+    ul.drop-list {
+        margin: 0;
+        padding: 10px;
+        list-style: none;
+        li {
+            padding-bottom: 5px;
+            &:last-child {
+                padding-bottom: 0;
+            }
+            span.title {
+                color: #000;
+                display: block;
+                padding-bottom: 5px;
+                border-bottom: 1px solid #333;
+            }
+            a {
+                color: #000;
+                padding: 0 10px!important;
+            }
+        }
+    }
+}
+
+//*===== header css ends  ====*//
+
+//?====== vertical sidebar css start ======?//
+.main-content {
+    @extend %flex;
+    justify-content: space-between;
+    .vertical-sidebar {
+        position: fixed;
+        left: -250px;
+        top: 0;
+        width: 250px;
+        height: 100vh;
+        background: $white-color;
+        // border-right: 1px solid $border-color;
+        z-index: 111;
+        transition: all 0.5s ease-in-out;
+        @include breakpoint (md) {
+            width: 250px;
+            left: 0;
+        }
+        &.navSlide {
+            left: 0;
+            @include breakpoint (md) {
+                left: -250px;
+            }
+        }
+        .sidebar-content {
+            padding-top: 20px;
+            &:hover {
+                .sidebar-menu {
+                    &::-webkit-scrollbar {
+                        display: block;
+                    }
+                }
+            }
+            .brand-logo {
+                text-align: center;
+                img {
+                    height: 60px;
+                }
+                span {
+                    i {
+                        font-size: 25px;
+                        color: $theme-color;
+                    }
+                }
+            }
+            .seller-thumb {
+                text-align: center;
+                padding: 30px;
+                .img-thumb {
+                    img {
+                        height: 100px;
+                        width: 100px;
+                        border-radius: 100%;
+                    }
+                }
+                .text-thumb {
+                    padding-top: 12px;
+                    p {
+                        margin: 0;
+                        font-size: 14px;
+                        font-weight: 500;
+                    }
+                    span {
+                        font-size: 12px;
+                        color: #000;
+                        position: relative;
+                        padding-left: 10px;
+                        &::before {
+                            @extend %absolute;
+                            top: 50%;
+                            left: 0;
+                            height: 5px;
+                            width: 5px;
+                            transform: translateY(-50%);
+                            border-radius: 100%;
+                            background: $theme-color;
+                        }
+                    }
+                }
+                .post-status {
+                    ul.status-list {
+                        padding: 0;
+                        margin: 0;
+                        @extend %flex;
+                        align-items: center;
+                        list-style: none;
+                        justify-content: space-between;
+                        li {
+                            margin: 5px;
+                            text-align: center;
+                            strong {
+                                color: $theme-color;
+                            }
+                            p {
+                                margin: 0;
+                                font-size: 12px;
+                            }
+                        }
+                    }
+                }
+            }
+            .sidebar-menu {
+                overflow-y: auto;
+                max-height: 300px;
+                &::-webkit-scrollbar {
+                    display: none;
+                }
+                ul.menu-list {
+                    margin: 0;
+                    padding: 0;
+                    list-style: none;
+                    .menu-title {
+                        padding: 12px;
+                        p {
+                            margin: 0;
+                            font-weight: 500;
+                            text-transform: uppercase;
+                        }
+                    }
+                    li {
+                        position: relative;
+                        a {
+                            display: block;
+                            text-decoration: none;
+                            padding: 10px 10px 10px 15px;
+                            span {
+                                color: #000;
+                                i {
+                                    margin-right: 10px;
+                                    color: $theme-color;
+                                }
+                            }
+                            &.active {
+                                background: #69474785;
+                                &::before {
+                                    @extend %absolute;
+                                    top: 0;
+                                    left: 0;
+                                    height: 100%;
+                                    width: 5px;
+                                    background: $theme-color;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+    .content-right {
+        width: 100%;
+        margin-left: 0; 
+        overflow-x: hidden;
+        transition: all 0.5s ease-in-out;
+        @include breakpoint (md) {
+            margin-left: 250px;
+        }
+        &.changeWidth {
+            @include breakpoint (md) {
+                margin-left: 0;
+            }
+        }
+
+        //*====== top navbar start =====*//
+        .top-navbar {  
+            position: relative; 
+            border-bottom: 1px solid $border-color; 
+            .nav-item {
+                @extend %flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 18px 15px;
+                background: $white-color;
+                .left-menu {
+                    @extend %flex;
+                    align-items: center;
+                    .nav-toggle {
+                        i {
+                            color: $theme-color;
+                            font-size: 30px;
+                            cursor: pointer;
+                        }
+                        &.change {
+                            i {
+                                &::after {
+                                    content: "\f0c9";
+                                }
+                                &::before {
+                                    content: none;
+                                }
+                            }
+                        }
+                    }
+                    ul.left-menulist {
+                        padding: 0;
+                        margin: 0;
+                        @extend %flex;
+                        list-style: none;
+                        li {
+                            margin-right: 12px;
+                            &:last-child {
+                                margin-right: 0;
+                            }
+                            &.active {
+                                position: relative;
+                                &::before {
+                                    @extend %absolute;
+                                    bottom: -24px;
+                                    height: 3px;
+                                    width: 100%;
+                                    background: $theme-color;
+                                }
+                            }
+                        }
+                    }
+                }
+                .menu-item {
+                    ul.item-list {
+                        margin: 0;
+                        padding: 0;
+                        list-style: none;
+                        @extend %flex;
+                        align-items: center;
+                        &.top-list {
+                            transform: translateY(0);
+                            opacity: 1;
+                            visibility: visible;
+                        }
+                        @include breakpoint (max-sm) {
+                            position: absolute;
+                            top: 100%;
+                            left: 0;
+                            width: 100%;
+                            height: 210px;
+                            display: block;
+                            padding: 30px 16px;
+                            opacity: 0;
+                            transform: translateY(35px);
+                            background: $theme-color;
+                            z-index: 111;
+                            transition: all 0.3s ease-in-out;
+                        }
+                        li {
+                            padding: 0 16px;
+                            @include breakpoint (max-sm) {
+                                padding-bottom: 10px;
+                            }
+                            @include breakpoint (md) {
+                                padding: 0 24px;
+                            }
+                            &:last-child {
+                                padding-right: 0;
+                                @include breakpoint (sm) {    
+                                    border-left: 1px solid silver;
+                                }
+                            }
+                            a {
+                                color: #000;
+                                @include breakpoint (max-sm) {
+                                    color: $white-color;
+                                }
+                                span {
+                                    i {
+                                        margin-left: 10px;
+                                        font-size: 25px;
+                                        color: $theme-color;
+                                        @include breakpoint (max-sm) {
+                                            color: $white-color;
+                                        }
+                                        position: relative;
+                                        &::after {
+                                            position: absolute;
+                                            content: "3";
+                                            top: -5px;
+                                            right: -5px;
+                                            font-size: 12px;
+                                            height: 15px;
+                                            width: 15px;
+                                            line-height: 15px;
+                                            text-align: center;
+                                            border-radius: 100%;
+                                            color: $white-color;
+                                            background: #d6c14b;
+                                        }
+                                    }
+                                    @include breakpoint (max-sm) {
+                                        color: $white-color;
+                                    }
+                                }
+                            }
+                            &.dropdown {
+                                ul.dropdown-menu {
+                                    top: 18px!important;
+                                    li {
+                                        a {
+                                            color: $theme-color;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    .top-toggle {
+                        i {
+                            color: $theme-color;
+                            font-size: 30px;
+                            cursor: pointer;
+                        }
+                    }
+                }
+            }
+        }
+        //*====== top navbar ends  =====*//
+
+        
+        //*====== footer area start =======*//
+        footer {
+            padding: 20px 15px;
+            background: $white-color;
+            .footer-content {
+                @extend %flex;
+                align-items: center;
+                justify-content: space-between;
+                p {
+                    margin: 0;
+                }
+            }
+        }
+        //*====== footer area ends  =======*//
+
+    }
+}
+//?====== vertical sidebar css ends  ======?//
+
+
+
+@keyframes videobutton {
+    0% {
+      transform: scale(0);
+      opacity: 1; 
+    }
+    100% {
+      transform: scale(1);
+      opacity: 0; 
+    } 
+}

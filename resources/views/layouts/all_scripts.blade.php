@@ -1,0 +1,9 @@
+<script src="{{asset('backend/assets/js/vendors.min.js')}}"></script>
+<script src="{{asset('backend/assets/js/bootstrap.min.js')}}"></script>
+<script src="{{asset('backend/assets/js/jquery-ui.js')}}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.2.2/jquery.form.js"></script>
+<script src="{{asset('backend/assets/js/swiper.min.js')}}"></script>
+<script src="{{asset('backend/assets/js/lightcase.js')}}"></script>
+<script src="{{asset('backend/assets/js/jquery.dataTables.min.js')}}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+<script src="{{asset('backend/assets/js/function.js')}}"></script>
