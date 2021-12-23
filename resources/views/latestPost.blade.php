@@ -36,11 +36,11 @@
                     <div class="col-md-3 col-sm-12">
                         <div class="blog-item style-one">
                             <div class="item-thumb">
-                                <img src="{{asset('upload/blogger_image_post')}}/{{$post->fimage}}" alt=""
+                                <img src="{{asset($post->medias[0]->address)}}" alt=""
                                      style="height: 180px">
                                 @if(isset($post->video))
                                     <div class="video-btn">
-                                        <a href="{{route('post.show',['template_type' => $post->post_type ,'template_id' => $post->template_id,'slug' => $post->slug])}}">
+                                        <a href="{{route('post.show',['template_type' => $post->post_type , 'slug' => $post->slug])}}">
                                             <i class="fa fa-play"></i>
                                         </a>
                                     </div>
@@ -52,7 +52,7 @@
                                             +{{$post->categories->count()-1}}
                                             more @break @endif  @endforeach</span>
                                 </div>
-                                <a href="{{route('post.show',['template_type' => $post->post_type ,'template_id' => $post->template_id,'slug' => $post->slug])}}">
+                                <a href="{{route('post.show',['template_type' => $post->post_type , 'slug' => $post->slug])}}">
                                     <h5>{{substr($post->title, 0, 80)}}</h5>
                                 </a>
                             </div>

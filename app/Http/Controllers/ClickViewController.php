@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BlogView;
 use App\Models\Click;
 use App\Models\View;
+use App\Models\WebsiteView;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -83,5 +85,57 @@ class ClickViewController extends Controller
         }
 
         return response()->json(['success' => 'Success']);
+    }
+
+    public function website_views(Request $request)
+    {
+        $viewed = WebsiteView::where('ip_address', request()->getClientIp())
+            ->whereDate('created_at', Carbon::today())->first();
+
+        if ($viewed == null) {
+            try {
+                $website_views = new WebsiteView();
+                $website_views->session_id = request()->getSession()->getId();
+                $website_views->ip_address = request()->getClientIp();
+                $website_views->agent = request()->header('User-Agent');
+
+                $website_views->save();
+
+                return response()->json(['success' => 'Success']);
+            }
+            catch (\Exception $e)
+            {
+                return response()->json(['success' => $e]);
+            }
+        }
+
+        return response()->json(['success' => 'Already visited this site']);
+    }
+
+    public function blog_views(Request $request)
+    {
+        $viewed = BlogView::where('ip_address', request()->getClientIp())
+            ->whereDate('created_at', Carbon::today())->first();
+
+        if ($viewed == null) {
+            try {
+                $blog_views = new BlogView();
+                $blog_views->blogger_id = $request->blogger_id;
+                $blog_views->blog_id = $request->blog_id;
+                $blog_views->session_id = request()->getSession()->getId();
+                $blog_views->ip_address = request()->getClientIp();
+                $blog_views->agent = request()->header('User-Agent');
+
+                $blog_views->save();
+
+                return response()->json(['success' => 'Success']);
+            }
+            catch (\Exception $e)
+            {
+                return response()->json(['success' => $e]);
+            }
+        }
+
+        return response()->json(['success' => 'Already visited this blog']);
     }
 }

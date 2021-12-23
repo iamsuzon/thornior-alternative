@@ -30,8 +30,9 @@ class NotifyAdminUserActivity
         $notify = new NotifyAdmin();
         $notify->blogger_id = $event->blogger_id;
         $notify->template_type = $event->template_type;
-        $notify->template_id = $event->template_id;
-        $notify->post_id = $event->post_id;
+        $notify->slug = $event->slug;
+        $notify->image_id = $event->image_id;
+        $notify->video_id = $event->video_id;
         $notify->save();
     }
 }

@@ -66,7 +66,7 @@
                                                 +{{$post->categories->count()-1}}
                                                 more @break @endif  @endforeach</span>
                                         </div>
-                                        <a href="{{route('post.show',['template_type' => $post->post_type ,'template_id' => $post->template_id,'slug' => $post->slug])}}">
+                                        <a href="{{route('post.show',['template_type' => $post->post_type , 'slug' => $post->slug])}}">
                                             <h5>{{$post->title}}</h5>
                                         </a>
                                     </div>
@@ -187,7 +187,7 @@
                                          style="height: 180px">
                                     @if(isset($post->video))
                                         <div class="video-btn">
-                                            <a href="{{route('post.show',['template_type' => $post->post_type ,'template_id' => $post->template_id,'slug' => $post->slug])}}">
+                                            <a href="{{route('post.show',['template_type' => $post->post_type , 'slug' => $post->slug])}}">
                                                 <i class="fa fa-play"></i>
                                             </a>
                                         </div>

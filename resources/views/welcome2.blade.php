@@ -4,11 +4,12 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="{{ asset('js/app.js') }}" defer></script>
     <!-- All Styles -->
     @include('layouts.all_styles')
 
-    <title>Thornior</title>
+    <title>{{ENV('APP_NAME')}}</title>
 </head>
 <body>
 
@@ -21,11 +22,9 @@
     <div class="container-fluid p-0">
         <div class="banner-slider">
             <div class="swiper-wrapper">
-                @if(isset($posts) AND count($posts['posts']) > 3)
-                    @foreach($posts['posts'] as $post)
-                        @if($loop->index == 6)
-                            @break
-                        @endif
+                @if(isset($posts) AND count($posts['latestPost']) > 3)
+                    @foreach($posts['latestPost'] as $post)
+                    @break($loop->index == 6)
                         <div class="swiper-slide"
                              style="background-image: url({{asset($post->medias[0]->address)}}">
                             <div class="thumb-content">
@@ -333,6 +332,7 @@
             <div class="latest-blog-slider">
                 <div class="swiper-wrapper">
                     @foreach($posts['latestPost'] as $post)
+                        @break($loop->index == 10)
                         <div class="swiper-slide">
                             <div class="blog-item style-one">
                                 <div class="item-thumb">
@@ -352,7 +352,7 @@
                                             +{{$post->categories->count()-1}}
                                             more @break @endif  @endforeach</span>
                                     </div>
-                                    <a href="{{route('post.show',['template_type' => $post->post_type ,'template_id' => $post->template_id,'slug' => $post->slug])}}">
+                                    <a href="{{route('post.show',['template_type' => $post->post_type, 'slug' => $post->slug])}}">
                                         <h5>{{substr($post->title, 0, 80)}}</h5>
                                     </a>
                                 </div>
@@ -399,19 +399,21 @@
             </div>
             <div class="viewed-blog-slider">
                 <div class="swiper-wrapper">
+                    @php $i=1; @endphp
                     @foreach($posts['mostViewed'] as $key => $post)
+                        @break($loop->index == 5)
                         <div class="swiper-slide">
                             <div class="blog-item style-one">
                                 <div class="thumb-crount">
                                     <div class="crount">
-                                        <span>0{{$key}}</span>
+                                        <span>0{{$i++}}</span>
                                     </div>
                                     <div class="item-thumb">
                                         <img src="{{asset($post->medias[0]->address)}}" alt=""
                                              style="height: 200px">
                                         @if(isset($post->video))
                                             <div class="video-btn">
-                                                <a href="{{route('post.show',['template_type' => $post->post_type ,'template_id' => $post->template_id,'slug' => $post->slug])}}">
+                                                <a href="{{route('post.show',['template_type' => $post->post_type , 'slug' => $post->slug])}}">
                                                     <i class="fa fa-play"></i>
                                                 </a>
                                             </div>
@@ -424,7 +426,7 @@
                                             +{{$post->categories->count()-1}}
                                             more @break @endif  @endforeach</span>
                                     </div>
-                                    <a href="{{route('post.show',['template_type' => $post->post_type ,'template_id' => $post->template_id,'slug' => $post->slug])}}">
+                                    <a href="{{route('post.show',['template_type' => $post->post_type , 'slug' => $post->slug])}}">
                                         <h5>{{substr($post->title, 0, 80)}}</h5>
                                     </a>
                                 </div>
@@ -461,15 +463,23 @@
             <div class="room-wrapper">
                 <div class="row">
                     <div class="col-12 text-center">
-                        <a href="{{route('categories.selected', 'living-room')}}" class="btn" style="background-color: #fff;color: #000;border: 1px solid #000; border-radius: 5px;">Living Room</a>
-                        <a href="{{route('categories.selected', 'kitchen')}}" class="btn mx-2" style="background-color: #fff;color: #000;border: 1px solid #000; border-radius: 5px;">Kitchen</a>
-                        <a href="{{route('categories.selected', 'bedroom')}}" class="btn mx-2" style="background-color: #fff;color: #000;border: 1px solid #000; border-radius: 5px;">Bedroom</a>
-                        <a href="{{route('categories.selected', 'home-office')}}" class="btn" style="background-color: #fff;color: #000;border: 1px solid #000; border-radius: 5px;">Home Office</a>
+                        <a href="{{route('categories.selected', 'living-room')}}" class="btn"
+                           style="background-color: #fff;color: #000;border: 1px solid #000; border-radius: 5px;">Living
+                            Room</a>
+                        <a href="{{route('categories.selected', 'kitchen')}}" class="btn mx-2"
+                           style="background-color: #fff;color: #000;border: 1px solid #000; border-radius: 5px;">Kitchen</a>
+                        <a href="{{route('categories.selected', 'bedroom')}}" class="btn mx-2"
+                           style="background-color: #fff;color: #000;border: 1px solid #000; border-radius: 5px;">Bedroom</a>
+                        <a href="{{route('categories.selected', 'home-office')}}" class="btn"
+                           style="background-color: #fff;color: #000;border: 1px solid #000; border-radius: 5px;">Home
+                            Office</a>
                     </div>
                 </div>
                 <div class="row mt-3">
                     <div class="col-8 offset-4">
-                        <a href="{{route('categories.selected', 'kids-room')}}" class="btn" style="background-color: #fff;color: #000;border: 1px solid #000; border-radius: 5px;">Kids Room</a>
+                        <a href="{{route('categories.selected', 'kids-room')}}" class="btn"
+                           style="background-color: #fff;color: #000;border: 1px solid #000; border-radius: 5px;">Kids
+                            Room</a>
                     </div>
                 </div>
             </div>
@@ -488,6 +498,7 @@
         <div class="section-wrapper">
             <div class="row">
                 @foreach($posts['blogs'] as $blog)
+                    @break($loop->index == 9)
                     <div class="col-lg-2 col-md-4 col-6 mb-4 mb-lg-0">
                         <div class="creator-item">
                             <div class="item-thumb">
@@ -746,13 +757,14 @@
             <div class="videos-blog-slider">
                 <div class="swiper-wrapper">
                     @foreach($posts['video'] as $video)
+                        @break($loop->index == 10)
                         <div class="swiper-slide">
                             <div class="blog-item style-one">
                                 <div class="item-thumb">
                                     <img src="{{asset($video->medias[0]->address)}}" alt=""
                                          style="height: 200px">
                                     <div class="video-btn">
-                                        <a href="{{route('post.show',['template_type' => $video->post_type ,'template_id' => $video->template_id,'slug' => $video->slug])}}">
+                                        <a href="{{route('post.show',['template_type' => $video->post_type , 'slug' => $video->slug])}}">
                                             <i class="fa fa-play"></i>
                                         </a>
                                     </div>
@@ -763,7 +775,7 @@
                                             +{{$video->categories->count()-1}}
                                             more @break @endif  @endforeach</span>
                                     </div>
-                                    <a href="{{route('post.show',['template_type' => $video->post_type ,'template_id' => $video->template_id,'slug' => $video->slug])}}">
+                                    <a href="{{route('post.show',['template_type' => $video->post_type , 'slug' => $video->slug])}}">
                                         <h5>{{substr($video->title, 0, 80)}}</h5>
                                     </a>
                                 </div>
@@ -1222,46 +1234,73 @@
 </section>
 <!-- collabs blog slider ends  -->
 
-<!-- footer area star -->
-<footer class="border-top pt-5">
+<!-- Feed start -->
+<section class="viewed-blog padding-tb pt-0">
     <div class="container">
-        <div class="d-flex flex-wrap justify-content-md-between justify-content-center">
-            <div class="footer-menu">
-                <ul class="menulist list-unstyled d-flex align-items-center p-0 m-0">
-                    <li class="me-3"><a href="{{route('index')}}">Home</a></li>
-                    <li class="me-3"><a href="{{route('about')}}">About</a></li>
-                    <li class="me-3"><a href="{{route('blogs')}}">Creators</a></li>
-                    <li><a href="{{route('about')}}">Contact</a></li>
-                </ul>
+        <div class="section-wrapper">
+            <div class="section-header">
+                <h3>Feed</h3>
+                <hr style="height: 3px;margin-top: 8px;background-color: #000000">
             </div>
-            <div class="social-link pt-3 pt-md-0">
-                <ul class="media-list list-unstyled d-flex p-0 m-0">
-                    <li class="me-3"><span>Follow us :</span></li>
-                    <li class="me-3 d-flex flex-wrap justify-content-center">
-                        <i class="me-2 fab fa-facebook-f"></i>
-                        <span>Facebook</span>
-                    </li>
-                    <li class="me-3 d-flex flex-wrap justify-content-center">
-                        <i class="me-2 fab fa-pinterest-p"></i>
-                        <span>Pinterest</span>
-                    </li>
-                    <li class="d-flex flex-wrap justify-content-center">
-                        <i class="me-2 fab fa-instagram"></i>
-                        <span>Instagram</span>
-                    </li>
-                </ul>
+        </div>
+
+        <div class="section-wrapper my-2">
+            <div class="row">
+                @if(isset($posts['allPost']))
+                    @foreach($posts['allPost'] as $post)
+                        <div class="col-md-3 col-sm-12" @if($loop->index > 3) style="margin-top: 40px" @endif>
+                            <div class="blog-item style-one">
+                                <div class="item-thumb">
+                                    <img src="{{asset($post->medias[0]->address)}}" alt=""
+                                         style="height: 180px">
+                                    @if(isset($post->video))
+                                        <div class="video-btn">
+                                            <a href="{{route('post.show',['template_type' => $post->post_type , 'slug' => $post->slug])}}">
+                                                <i class="fa fa-play"></i>
+                                            </a>
+                                        </div>
+                                    @endif
+                                </div>
+                                <div class="blog-text">
+                                    <div class="blog-cat">
+                                    <span
+                                        class="bg-dark text-white">@foreach($post->categories as $category) {{$category->name}} @if($post->categories->count() > 1)
+                                            +{{$post->categories->count()-1}}
+                                            more @break @endif  @endforeach</span>
+                                    </div>
+                                    <a href="{{route('post.show',['template_type' => $post->post_type ,'slug' => $post->slug])}}">
+                                        <h5>{{substr($post->title, 0, 80)}}</h5>
+                                    </a>
+                                </div>
+                                <div class="blog-timeline">
+                                    <div class="bloger-thumb">
+                                        <img src="{{asset('upload/blogger/avatar')}}/{{$post->blogger->image}}" alt=""
+                                             style="width: 25px;height: 25px">
+                                    </div>
+                                    <div class="time-line">
+                                        <span class="border-end pe-2"
+                                              style="font-size: 13px">{{substr($post->blogger->blog->blog_name,0,10)}}{{strlen($post->blogger->blog->blog_name)>10 ? '..' : ''}}</span>
+                                        <span style="font-size: 13px">{{$post->created_at->diffForHumans()}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                @else
+                    <p style="color: gray">No Post Available Right Now</p>
+                @endif
             </div>
         </div>
     </div>
-    <div class="footer-bottom mt-5">
-        <div class="bottom-content bg-dark text-center pt-3 pb-3">
-            <p class="m-0 text-white">&copy; Designed By <a href="#0" class="text-white font-bold">Thornior</a></p>
-        </div>
-    </div>
-</footer>
+</section>
+<!-- Feed ends  -->
+
+<!-- footer area star -->
+@include('layouts.footer')
 <!-- footer area ends -->
 
 <!-- All JS -->
 @include('layouts.all_scripts')
+@include('layouts.website_view_count_script')
 </body>
 </html>

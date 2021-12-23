@@ -25,7 +25,6 @@ class CreateUsersTable extends Migration
             $table->string('image')->default('user.jpg');
             $table->rememberToken();
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 

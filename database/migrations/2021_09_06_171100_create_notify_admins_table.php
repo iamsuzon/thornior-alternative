@@ -15,12 +15,18 @@ class CreateNotifyAdminsTable extends Migration
     {
         Schema::create('notify_admins', function (Blueprint $table) {
             $table->id();
-            $table->integer('blogger_id');
-            $table->string('template_type');
-            $table->integer('template_id');
-            $table->integer('post_id');
+            $table->unsignedBigInteger('blogger_id');
+            $table->string('template_type')->nullable();
+            $table->string('slug')->nullable();
+            $table->unsignedBigInteger('image_id')->nullable();
+            $table->unsignedBigInteger('video_id')->nullable();
             $table->timestamps();
+
+            $table->foreign('video_id')->references('id')->on('videos')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreign('image_id')->references('id')->on('images')->onDelete('cascade')->onUpdate('cascade');
         });
+
+
     }
 
     /**

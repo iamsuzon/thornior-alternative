@@ -16,7 +16,7 @@ class CreateHideUnhidesTable extends Migration
         Schema::create('hide_unhides', function (Blueprint $table) {
             $table->id();
             $table->integer('blogger_id');
-            $table->integer('blog_id');
+            $table->unsignedBigInteger('blog_id');
             $table->boolean('is_page')->nullable();
             $table->boolean('is_section')->nullable();
             $table->string('page_name')->nullable();
@@ -24,6 +24,8 @@ class CreateHideUnhidesTable extends Migration
             $table->string('status')->default('active');
             $table->timestamp('modified_at');
             $table->timestamps();
+
+            $table->foreign('blog_id')->references('id')->on('all_blogs')->onDelete('cascade')->onUpdate('cascade');
         });
     }
 

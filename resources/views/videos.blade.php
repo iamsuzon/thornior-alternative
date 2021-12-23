@@ -35,7 +35,7 @@
                         @foreach($posts['videos'] as $video)
                             <div class="swiper-slide">
                                 <div class="video-thumb" style="height: 300px">
-                                    <img src="{{asset('upload/blogger_image_post')}}/{{$video->fimage}}" alt=""
+                                    <img src="{{asset($video->medias[0]->address)}}" alt=""
                                          style="height: 100%">
                                     <div class="thumb-text">
                                         <div class="text-cat">
@@ -328,10 +328,10 @@
                         <div class="swiper-slide">
                             <div class="blog-item style-one">
                                 <div class="item-thumb">
-                                    <img src="{{asset('upload/blogger_image_post')}}/{{$video->fimage}}" alt=""
+                                    <img src="{{asset($video->medias[0]->address)}}" alt=""
                                          style="height: 200px">
                                     <div class="video-btn">
-                                        <a href="{{route('post.show',['template_type' => $video->post_type ,'template_id' => $video->template_id,'slug' => $video->slug])}}">
+                                        <a href="{{route('post.show',['template_type' => $video->post_type , 'slug' => $video->slug])}}">
                                             <i class="fa fa-play"></i>
                                         </a>
                                     </div>
@@ -342,7 +342,7 @@
                                             +{{$video->categories->count()-1}}
                                             more @break @endif  @endforeach</span>
                                     </div>
-                                    <a href="{{route('post.show',['template_type' => $video->post_type ,'template_id' => $video->template_id,'slug' => $video->slug])}}">
+                                    <a href="{{route('post.show',['template_type' => $video->post_type , 'slug' => $video->slug])}}">
                                         <h5>{{substr($video->title, 0, 80)}}</h5>
                                     </a>
                                 </div>
@@ -387,19 +387,21 @@
             </div>
             <div class="viewed-blog-slider">
                 <div class="swiper-wrapper">
+                    @php $i=1; @endphp
                     @foreach($posts['mostViewed'] as $key => $post)
+                        @break($loop->index == 5)
                         <div class="swiper-slide">
                             <div class="blog-item style-one">
                                 <div class="thumb-crount">
                                     <div class="crount">
-                                        <span>0{{$key}}</span>
+                                        <span>0{{$i++}}</span>
                                     </div>
                                     <div class="item-thumb">
-                                        <img src="{{asset('upload/blogger_image_post')}}/{{$post->fimage}}" alt=""
+                                        <img src="{{asset($post->medias[0]->address)}}" alt=""
                                              style="height: 200px">
                                         @if(isset($post->video))
                                             <div class="video-btn">
-                                                <a href="{{route('post.show',['template_type' => $post->post_type ,'template_id' => $post->template_id,'slug' => $post->slug])}}">
+                                                <a href="{{route('post.show',['template_type' => $post->post_type , 'slug' => $post->slug])}}">
                                                     <i class="fa fa-play"></i>
                                                 </a>
                                             </div>
@@ -412,7 +414,7 @@
                                             +{{$post->categories->count()-1}}
                                             more @break @endif  @endforeach</span>
                                     </div>
-                                    <a href="{{route('post.show',['template_type' => $post->post_type ,'template_id' => $post->template_id,'slug' => $post->slug])}}">
+                                    <a href="{{route('post.show',['template_type' => $post->post_type , 'slug' => $post->slug])}}">
                                         <h5>{{substr($post->title, 0, 80)}}</h5>
                                     </a>
                                 </div>
@@ -707,10 +709,10 @@
                         <div class="swiper-slide">
                             <div class="blog-item style-one">
                                 <div class="item-thumb">
-                                    <img src="{{asset('upload/blogger_image_post')}}/{{$video->fimage}}" alt=""
+                                    <img src="{{asset($video->medias[0]->address)}}" alt=""
                                          style="height: 200px">
                                     <div class="video-btn">
-                                        <a href="{{route('post.show',['template_type' => $video->post_type ,'template_id' => $video->template_id,'slug' => $video->slug])}}">
+                                        <a href="{{route('post.show',['template_type' => $video->post_type , 'slug' => $video->slug])}}">
                                             <i class="fa fa-play"></i>
                                         </a>
                                     </div>
@@ -721,7 +723,7 @@
                                             +{{$video->categories->count()-1}}
                                             more @break @endif  @endforeach</span>
                                     </div>
-                                    <a href="{{route('post.show',['template_type' => $video->post_type ,'template_id' => $video->template_id,'slug' => $video->slug])}}">
+                                    <a href="{{route('post.show',['template_type' => $video->post_type , 'slug' => $video->slug])}}">
                                         <h5>{{substr($video->title, 0, 80)}}</h5>
                                     </a>
                                 </div>

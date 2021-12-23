@@ -108,27 +108,28 @@
                 @if($collection->all_collection->count() != 0)
                     @php $i=1 @endphp
                     @foreach($collection->all_collection as $each => $collect)
-                        @php $relation = $collect->template_type.'_post_'.$collect->template_id @endphp
+                        @php $relation = $collect->template_type @endphp
                         <div class="row">
                             <div class="col-8 main-image">
                                     <img class="img-fluid"
-                                         src="{{asset('upload/blogger_image_post')}}/{{$collect->$relation->fimage}}"
+                                         src="{{asset($collect->$relation->medias[0]->address)}}"
                                          alt=""/>
                             </div>
                             <div class="col-4 side-images">
                                     <img
                                         class="img-fluid rt-rounded rt-rounded"
-                                        src="{{asset('upload/blogger_image_post')}}/{{$collect->$relation->fimage}}"
+                                        src="{{asset($collect->$relation->medias[0]->address)}}"
                                         alt=""
                                     />
-                                    <img class="img-fluid" src="{{asset('upload/blogger_image_post')}}/{{$collect->$relation->fimage}}" alt=""/>
+                                    <img class="img-fluid" src="{{asset($collect->$relation->medias[0]->address)}}" alt=""/>
                                     <img
                                         class="img-fluid rb-rounded rb-rounded"
-                                        src="{{asset('upload/blogger_image_post')}}/{{$collect->$relation->fimage}}"
+                                        src="{{asset($collect->$relation->medias[0]->address)}}"
                                         alt=""
                                     />
                             </div>
                         </div>
+                        @break
                     @endforeach
                 @else
                     <div class="row">
@@ -162,6 +163,10 @@
                 </div>
             </a>
         @empty
+            <div>
+                <h3 class="text-capitalize" style="font-size: 25px">This Collection is empty</h3>
+                <p>Add from saved post or explore our library full of inspiration.</p>
+            </div>
         @endforelse
     </div>
 @endsection

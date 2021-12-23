@@ -64,6 +64,8 @@
                             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
                                 <a class="dropdown-item"
                                    href="{{ route('blogger.dashboard') }}">{{ __('Dashboard') }}</a>
+                                <a class="dropdown-item"
+                                   href="{{ route('blogger.settings.profile') }}">{{ __('Settings') }}</a>
                                 <a class="dropdown-item" href="#"
                                    onclick="event.preventDefault();
                                                          document.getElementById('logout-form').submit();">

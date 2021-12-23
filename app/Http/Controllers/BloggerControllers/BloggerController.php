@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\BloggerControllers;
 
+use App\Events\UserActivity;
 use App\Models\AllBlogs;
 use App\Models\BlogAbout;
 use App\Models\Blogger;
@@ -68,7 +69,7 @@ class BloggerController extends Controller
         }
 
         $posts['posts'] = collect($posts['posts'])->sortBy('created_at')->reverse();
-        $posts['comments'] = Comments::where('post_user_id', $auth_id)->get()->sortByDesc('created_at');
+        $posts['comments'] = Comments::where('post_owner_id', $auth_id)->get()->sortByDesc('created_at');
         $posts['categories'] = DB::table('taggables')
             ->join('categories', 'taggables.category_id', '=', 'categories.id')
             ->join('bloggers as blogger', 'taggables.blogger_id', '=', 'blogger.id')
@@ -151,6 +152,8 @@ class BloggerController extends Controller
 
         $blog->save();
 
+        event(new UserActivity($blog->blogger->id, null, null, null));
+
         return back()->with('message', 'Your Profile is Updated Successfully');
     }
 
@@ -180,7 +183,6 @@ class BloggerController extends Controller
         $blogger->email = $info['email'];
         $blogger->region = $info['region'];
         $blogger->about = $info['about'];
-
 
         $blogger->save();
 

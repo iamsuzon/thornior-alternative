@@ -182,7 +182,7 @@
                     <div class="blog-description my-5">
                         <div class="des-text my-5">
                             <h4 id="intro-heading"
-                                class="text-center">@if(isset($post['post'])) {{$post['post']->intro_header}} @else
+                                class="text-center">@if(isset($post['post'])) {{$post['post']->intro_heading}} @else
                                     Intro Heading @endif</h4>
                             <p id="intro-description">
                                 @if(isset($post['post'])) {{$post['post']->intro_description}} @else Lorem ipsum dolor,

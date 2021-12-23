@@ -36,7 +36,7 @@
                     <div class="col-md-3 col-sm-12">
                         <div class="blog-item style-one">
                             <div class="item-thumb">
-                                <img src="{{asset('upload/blogger_image_post')}}/{{$post->fimage}}" alt=""
+                                <img src="{{asset($post->medias[0]->address)}}" alt=""
                                      style="height: 180px">
                                 @if(isset($post->video))
                                     <div class="video-btn">

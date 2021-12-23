@@ -4,30 +4,25 @@ namespace App\Http\Controllers\AdminControllers;
 
 use App\Models\Admin;
 use App\Models\AllBlogs;
+use App\Models\AllCollections;
 use App\Models\BlogAbout;
+use App\Models\Blogger;
 use App\Models\BloggerProduct;
 use App\Models\BloggerReg;
+use App\Models\BlogView;
 use App\Models\Click;
 use App\Models\Comments;
 use App\Models\FAQs;
 use App\Models\FollowBlogger;
 use App\Models\HideUnhide;
-use App\Models\ImagePostTemplateFive;
-use App\Models\ImagePostTemplateFour;
-use App\Models\ImagePostTemplateOne;
-use App\Models\ImagePostTemplateSix;
-use App\Models\ImagePostTemplateThree;
-use App\Models\ImagePostTemplateTwo;
 use App\Models\Like;
 use App\Models\NotifyAdmin;
+use App\Models\PostCollection;
 use App\Models\SavePost;
-use App\Models\VideoPostTemplateFive;
-use App\Models\VideoPostTemplateFour;
-use App\Models\VideoPostTemplateOne;
-use App\Models\VideoPostTemplateSix;
-use App\Models\VideoPostTemplateThree;
-use App\Models\VideoPostTemplateTwo;
+use App\Models\User;
+use App\Models\Video;;
 use App\Models\View;
+use App\Models\WebsiteView;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -40,18 +35,35 @@ use Intervention\Image\Facades\Image;
 
 class AdminController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $views = View::select('id', 'view_count', 'created_at')
-            ->orderBy('created_at', 'asc')
-            ->get()
-            ->groupBy(function ($date) {
-                return Carbon::parse($date->created_at)->format('m'); // grouping by months
-            });
+        $bloggers = Blogger::where('last_seen', '!=', null)->orderBy('last_seen', 'DESC')->get();
+        if ($request->has('week')) {
+            $dateNow = Carbon::now()->subDays(7);
+
+            $views = View::select('id', 'view_count', 'created_at')
+                ->where('created_at', '>=', $dateNow)
+                ->orderBy('created_at', 'asc')
+                ->get()
+                ->groupBy(function ($date) {
+                    return Carbon::parse($date->created_at)->format('l'); // grouping by week
+                });
+
+            $format = 'week';
+        } else {
+            $views = View::select('id', 'view_count', 'created_at')
+                ->orderBy('created_at', 'asc')
+                ->get()
+                ->groupBy(function ($date) {
+                    return Carbon::parse($date->created_at)->format('m'); // grouping by months
+                });
+
+            $format = 'month';
+        }
 
         $activity = NotifyAdmin::orderBy('created_at', 'desc')->get();
 
-        return view('admin.dashboard', compact('views', 'activity'));
+        return view('admin.dashboard', compact('views', 'activity', 'format', 'bloggers'));
     }
 
     public function profile()
@@ -93,11 +105,30 @@ class AdminController extends Controller
 
     public function blogs()
     {
-        $bloggers = BloggerReg::orderBy('id','DESC')->get();
+        $bloggers = BloggerReg::orderBy('id', 'DESC')->get();
         $blogs = AllBlogs::all();
+        $users = User::all();
         $activity = NotifyAdmin::orderBy('created_at', 'desc')->get();
 
-        return view('admin.blogs', compact('blogs', 'activity', 'bloggers'));
+        $pending_users = $users->where('user_approved_at', null)
+            ->where('email_verified_at', '!=', null);
+
+        $accounts = null;
+        $i=0;
+        foreach ($blogs as $blog)
+        {
+            $accounts[$i] = $blog;
+            $i++;
+        }
+        foreach ($users as $user)
+        {
+            $accounts[$i] = $user;
+            $i++;
+        }
+
+        $accounts['all'] = collect($accounts)->sortBy('created_at')->reverse();
+
+        return view('admin.blogs', compact('accounts', 'activity', 'bloggers', 'users', 'pending_users'));
     }
 
     public function pauseBlog($slug)
@@ -118,6 +149,81 @@ class AdminController extends Controller
         }
     }
 
+    public function deleteUser($id)
+    {
+        $user = User::where('id',$id)->first();
+        abort_if($user == null, 404);
+
+        if ($user->image != 'user.jpg')
+        {
+            unlink('upload/user/avatar' . $user->image);
+        }
+
+        $saved = SavePost::where('user_id', $user->id)->get();
+
+        if ($saved != null)
+        {
+            foreach ($saved as $save)
+            {
+                $save->delete();
+            }
+        }
+
+        $likes = Like::where('user_id', $user->id)->get();
+
+        if ($likes != null)
+        {
+            foreach ($likes as $like)
+            {
+                $like->delete();
+            }
+        }
+
+        $comments = Comments::where('user_id', $user->id)->get();
+
+        if ($comments != null)
+        {
+            foreach ($comments as $comment)
+            {
+                $comment->delete();
+            }
+        }
+
+        $collections = PostCollection::where('user_id', $user->id)->get();
+
+        if ($collections != null)
+        {
+            foreach ($collections as $collection)
+            {
+                $collection->delete();
+            }
+        }
+
+        $collectionNames = AllCollections::where('user_id', $user->id)->get();
+
+        if ($collectionNames != null)
+        {
+            foreach ($collectionNames as $collectionName)
+            {
+                $collectionName->delete();
+            }
+        }
+
+        $follows = FollowBlogger::where('user_id', $user->id)->get();
+
+        if ($follows != null)
+        {
+            foreach ($follows as $follow)
+            {
+                $follow->delete();
+            }
+        }
+
+        $user->delete();
+
+        return back()->with('success', 'The visitor account is deleted permanently');
+    }
+
     public function deleteBlog($slug)
     {
         abort_if(AllBlogs::where('blog_slug', $slug)->exists() == false, 404);
@@ -125,286 +231,99 @@ class AdminController extends Controller
         $blog = AllBlogs::where('blog_slug', $slug)->first();
         $blogger = $blog->blogger;
 
-        $faqs = FAQs::where('blog_id', $blog->id)->get();
-        foreach ($faqs as $faq) {
-            $faq->delete();
-        }
-        $follow = FollowBlogger::where('blogger_id', $blogger->id)->first();
-        if ($follow != null) {
-            $follow->delete();
+        // FAQ will auto delete
+
+        $follows = FollowBlogger::where('blogger_id', $blogger->id)->get();
+
+        if ($follows != null)
+        {
+            foreach ($follows as $follow)
+            {
+                $follow->delete();
+            }
         }
 
         $blog_about = BlogAbout:: where('blog_id', $blog->id)->first();
+
         if ($blog_about != null) {
+            if ($blog_about->image)
+            {
+                unlink('upload/blogger/blog/'. $blog_about->image);
+            }
             $blog_about->delete();
+        }
+
+        if ($blog->image != NULL)
+        {
+            unlink('upload/blogger/blog/'. $blog->image);
         }
 
         $blog->delete();
 
-        $products = BloggerProduct::where('blogger_id', $blogger->id)->get();
-        foreach ($products as $product) {
-            unlink('upload/blogger_product/' . $product->image);
-            $product->delete();
+        // Product will auto delete
+
+        $image_posts = \App\Models\Image::where('blogger_id', $blogger->id)->get();
+        foreach ($image_posts as $post) {
+            $post->categories()->detach();
+            $post->delete();
         }
 
-        $image_1 = ImagePostTemplateOne::where('blogger_id', $blogger->id)->get();
-        foreach ($image_1 as $image) {
-            unlink('upload/blogger_image_post/' . $image->fimage);
-            unlink('upload/blogger_image_post/' . $image->article_image);
-            unlink('upload/blogger_image_post/' . $image->image1);
-            unlink('upload/blogger_image_post/' . $image->image2);
-            unlink('upload/blogger_image_post/' . $image->image3);
-            $image->delete();
-        }
-        $image_2 = ImagePostTemplateTwo::where('blogger_id', $blogger->id)->get();
-        foreach ($image_2 as $image) {
-            unlink('upload/blogger_image_post/' . $image->fimage);
-            unlink('upload/blogger_image_post/' . $image->article_image1);
-            unlink('upload/blogger_image_post/' . $image->article_image2);
-            unlink('upload/blogger_image_post/' . $image->article_image3);
-            unlink('upload/blogger_image_post/' . $image->article_image4);
-            unlink('upload/blogger_image_post/' . $image->article_image5);
-            unlink('upload/blogger_image_post/' . $image->bottom_image);
-            $image->delete();
-        }
-        $image_3 = ImagePostTemplateThree::where('blogger_id', $blogger->id)->get();
-        foreach ($image_3 as $image) {
-            unlink('upload/blogger_image_post/' . $image->fimage);
-            unlink('upload/blogger_image_post/' . $image->article_image1);
-            unlink('upload/blogger_image_post/' . $image->article_image2);
-            unlink('upload/blogger_image_post/' . $image->article_image3);
-            unlink('upload/blogger_image_post/' . $image->article_image4);
-            unlink('upload/blogger_image_post/' . $image->bottom_image1);
-            unlink('upload/blogger_image_post/' . $image->bottom_image2);
-            $image->delete();
-        }
-        $image_4 = ImagePostTemplateFour::where('blogger_id', $blogger->id)->get();
-        foreach ($image_4 as $image) {
-            unlink('upload/blogger_image_post/' . $image->fimage);
-            unlink('upload/blogger_image_post/' . $image->article_image1);
-            unlink('upload/blogger_image_post/' . $image->article_image2);
-            unlink('upload/blogger_image_post/' . $image->article_image3);
-            unlink('upload/blogger_image_post/' . $image->article_image4);
-            unlink('upload/blogger_image_post/' . $image->bottom_image1);
-            unlink('upload/blogger_image_post/' . $image->bottom_image2);
-            unlink('upload/blogger_image_post/' . $image->bottom_image3);
-            $image->delete();
-        }
-        $image_5 = ImagePostTemplateFive::where('blogger_id', $blogger->id)->get();
-        foreach ($image_5 as $image) {
-            unlink('upload/blogger_image_post/' . $image->fimage);
-            unlink('upload/blogger_image_post/' . $image->article_image1);
-            unlink('upload/blogger_image_post/' . $image->article_image2);
-            unlink('upload/blogger_image_post/' . $image->article_image3);
-            unlink('upload/blogger_image_post/' . $image->article_image4);
-            unlink('upload/blogger_image_post/' . $image->article_image5);
-            unlink('upload/blogger_image_post/' . $image->article_image6);
-            $product->delete();
-        }
-        $image_6 = ImagePostTemplateSix::where('blogger_id', $blogger->id)->get();
-        foreach ($image_6 as $image) {
-            unlink('upload/blogger_image_post/' . $image->fimage);
-            unlink('upload/blogger_image_post/' . $image->fimage2);
-            unlink('upload/blogger_image_post/' . $image->fimage3);
-            unlink('upload/blogger_image_post/' . $image->article_image1);
-            unlink('upload/blogger_image_post/' . $image->article_image2);
-            unlink('upload/blogger_image_post/' . $image->article_image3);
-            unlink('upload/blogger_image_post/' . $image->article_image4);
-            unlink('upload/blogger_image_post/' . $image->article_image5);
-            unlink('upload/blogger_image_post/' . $image->article_image6);
-            $image->delete();
-        }
-
-        $video_1 = VideoPostTemplateOne::where('blogger_id', $blogger->id)->get();
-        foreach ($video_1 as $video) {
-            if ($video->fimage != null) {
-                unlink('upload/blogger_image_post/' . $video->fimage);
-            }
-            if ($video->article_image != null) {
-                unlink('upload/blogger_image_post/' . $video->article_image);
-            }
-            if ($video->image1 != null) {
-                unlink('upload/blogger_image_post/' . $video->image1);
-            }
-            if ($video->image2 != null) {
-                unlink('upload/blogger_image_post/' . $video->image2);
-            }
-            if ($video->image3 != null) {
-                unlink('upload/blogger_image_post/' . $video->image3);
-            }
-            if ($video->video != null) {
-                unlink('upload/blogger_video_post/'. $blogger->id. '/' .$video->video);
-            }
-            $video->delete();
-        }
-        $video_2 = VideoPostTemplateTwo::where('blogger_id', $blogger->id)->get();
-        foreach ($video_2 as $video) {
-            if ($video->fimage != null) {
-                unlink('upload/blogger_image_post/' . $video->fimage);
-            }
-            if ($video->image1 != null) {
-                unlink('upload/blogger_image_post/' . $video->image1);
-            }
-            if ($video->image2 != null) {
-                unlink('upload/blogger_image_post/' . $video->image2);
-            }
-            if ($video->image3 != null) {
-                unlink('upload/blogger_image_post/' . $video->image3);
-            }
-            if ($video->image4 != null) {
-                unlink('upload/blogger_image_post/' . $video->image4);
-            }
-            if ($video->image5 != null) {
-                unlink('upload/blogger_image_post/' . $video->image5);
-            }
-            if ($video->image6 != null) {
-                unlink('upload/blogger_image_post/' . $video->image6);
-            }
-            if ($video->outro_image != null) {
-                unlink('upload/blogger_image_post/' . $video->outro_image);
-            }
-            if ($video->video != null) {
-                unlink('upload/blogger_video_post/' . $blogger->id. '/' .$video->video);
-            }
-            $video->delete();
-        }
-        $video_3 = VideoPostTemplateThree::where('blogger_id', $blogger->id)->get();
-        foreach ($video_3 as $video) {
-            if ($video->fimage != null) {
-                unlink('upload/blogger_image_post/' . $video->fimage);
-            }
-            if ($video->image1 != null) {
-                unlink('upload/blogger_image_post/' . $video->image1);
-            }
-            if ($video->image2 != null) {
-                unlink('upload/blogger_image_post/' . $video->image2);
-            }
-            if ($video->image3 != null) {
-                unlink('upload/blogger_image_post/' . $video->image3);
-            }
-            if ($video->image4 != null) {
-                unlink('upload/blogger_image_post/' . $video->image4);
-            }
-            if ($video->image5 != null) {
-                unlink('upload/blogger_image_post/' . $video->image5);
-            }
-            if ($video->video != null) {
-                unlink('upload/blogger_video_post/' . $blogger->id. '/' .$video->video);
-            }
-            $video->delete();
-        }
-        $video_4 = VideoPostTemplateFour::where('blogger_id', $blogger->id)->get();
-        foreach ($video_4 as $video) {
-            if ($video->fimage != null) {
-                unlink('upload/blogger_image_post/' . $video->fimage);
-            }
-            if ($video->image1 != null) {
-                unlink('upload/blogger_image_post/' . $video->image1);
-            }
-            if ($video->image2 != null) {
-                unlink('upload/blogger_image_post/' . $video->image2);
-            }
-            if ($video->image3 != null) {
-                unlink('upload/blogger_image_post/' . $video->image3);
-            }
-            if ($video->image4 != null) {
-                unlink('upload/blogger_image_post/' . $video->image4);
-            }
-            if ($video->image5 != null) {
-                unlink('upload/blogger_image_post/' . $video->image5);
-            }
-            if ($video->background_image != null) {
-                unlink('upload/blogger_image_post/' . $video->background_image);
-            }
-            if ($video->video != null) {
-                unlink('upload/blogger_video_post/' . $blogger->id. '/' .$video->video);
-            }
-            $video->delete();
-        }
-        $video_5 = VideoPostTemplateFive::where('blogger_id', $blogger->id)->get();
-        foreach ($video_5 as $video) {
-            if ($video->fimage != null) {
-                unlink('upload/blogger_image_post/' . $video->fimage);
-            }
-            if ($video->image1 != null) {
-                unlink('upload/blogger_image_post/' . $video->image1);
-            }
-            if ($video->image2 != null) {
-                unlink('upload/blogger_image_post/' . $video->image2);
-            }
-            if ($video->image3 != null) {
-                unlink('upload/blogger_image_post/' . $video->image3);
-            }
-            if ($video->image4 != null) {
-                unlink('upload/blogger_image_post/' . $video->image4);
-            }
-            if ($video->video != null) {
-                unlink('upload/blogger_video_post/' . $blogger->id. '/' .$video->video);
-            }
-            $video->delete();
-        }
-        $video_6 = VideoPostTemplateSix::where('blogger_id', $blogger->id)->get();
-        foreach ($video_6 as $video) {
-            if ($video->fimage != null) {
-                unlink('upload/blogger_image_post/' . $video->fimage);
-            }
-            if ($video->image1 != null) {
-                unlink('upload/blogger_image_post/' . $video->image1);
-            }
-            if ($video->image2 != null) {
-                unlink('upload/blogger_image_post/' . $video->image2);
-            }
-            if ($video->image3 != null) {
-                unlink('upload/blogger_image_post/' . $video->image3);
-            }
-            if ($video->image4 != null) {
-                unlink('upload/blogger_image_post/' . $video->image4);
-            }
-            if ($video->image5 != null) {
-                unlink('upload/blogger_image_post/' . $video->image5);
-            }
-            if ($video->image6 != null) {
-                unlink('upload/blogger_image_post/' . $video->image6);
-            }
-            if ($video->video != null) {
-                unlink('upload/blogger_video_post/' . $blogger->id. '/' .$video->video);
-            }
-            $video->delete();
+        $video_posts = Video::where('blogger_id', $blogger->id)->get();
+        foreach ($video_posts as $post) {
+            unlink('upload/blogger_video_post/' . $blogger->id . '/' . $post->video);
+            $post->categories()->detach();
+            $post->delete();
         }
 
         $saved = SavePost::where('post_user_id', $blogger->id)->get();
-        foreach ($saved as $save) {
-            $save->delete();
+
+        if ($saved != null)
+        {
+            foreach ($saved as $save)
+            {
+                $save->delete();
+            }
         }
 
         $likes = Like::where('post_user_id', $blogger->id)->get();
-        foreach ($likes as $like) {
-            $like->delete();
+
+        if ($likes != null)
+        {
+            foreach ($likes as $like)
+            {
+                $like->delete();
+            }
         }
 
-        $comments = Comments::where('post_user_id', $blogger->id)->get();
-        foreach ($comments as $comment) {
-            $comment->delete();
-        }
+        // Comments will auto delete
 
         $views = View::where('blogger_id', $blogger->id)->get();
-        foreach ($views as $view) {
-            $view->delete();
+
+        if ($views != null)
+        {
+            foreach ($views as $view)
+            {
+                $view->delete();
+            }
         }
 
         $clicks = Click::where('blogger_id', $blogger->id)->get();
-        foreach ($clicks as $click) {
-            $click->delete();
+
+        if ($clicks != null)
+        {
+            foreach ($clicks as $click)
+            {
+                $click->delete();
+            }
         }
 
-        $notify = NotifyAdmin::where('blogger_id', $blogger->id)->get();
-        foreach ($notify as $not) {
-            $not->delete();
-        }
+        // Notify Admin table data will auto delete
 
-        $hideUnhide = HideUnhide::where('blogger_id', $blogger->id)->get();
-        foreach ($hideUnhide as $hide) {
-            $hide->delete();
+        // Hide Unhide data will auto delete
+
+        if ($blogger->image != 'user.jpg')
+        {
+            unlink('upload/blogger/avatar/' . $blogger->image);
         }
 
         $blogger->delete();
@@ -414,195 +333,73 @@ class AdminController extends Controller
 
     public function activity()
     {
-        $activities = NotifyAdmin::orderBy('created_at','DESC')->get();
+        $activities = NotifyAdmin::orderBy('created_at', 'DESC')->get();
         $blogs = AllBlogs::all();
 
-        $posts['image_one'] = ImagePostTemplateOne::orderBy('created_at', 'DESC')->get();
-        $posts['image_two'] = ImagePostTemplateTwo::orderBy('created_at', 'DESC')->get();
-        $posts['image_three'] = ImagePostTemplateThree::orderBy('created_at', 'DESC')->get();
-        $posts['image_four'] = ImagePostTemplateFour::orderBy('created_at', 'DESC')->get();
-        $posts['image_five'] = ImagePostTemplateFive::orderBy('created_at', 'DESC')->get();
-        $posts['image_six'] = ImagePostTemplateSix::orderBy('created_at', 'DESC')->get();
-
-        $posts['video_one'] = VideoPostTemplateOne::orderBy('created_at', 'DESC')->get();
-        $posts['video_two'] = VideoPostTemplateTwo::orderBy('created_at', 'DESC')->get();
-        $posts['video_three'] = VideoPostTemplateThree::orderBy('created_at', 'DESC')->get();
-        $posts['video_four'] = VideoPostTemplateFour::orderBy('created_at', 'DESC')->get();
-        $posts['video_five'] = VideoPostTemplateFive::orderBy('created_at', 'DESC')->get();
-        $posts['video_six'] = VideoPostTemplateSix::orderBy('created_at', 'DESC')->get();
+        $posts['image'] = \App\Models\Image::orderBy('created_at', 'DESC')->limit(5)->get();
+        $posts['video'] = Video::orderBy('created_at', 'DESC')->limit(5)->get();
 
         $post_index = 0;
         $posts['posts'] = null;
-        foreach ($posts['image_one'] as $post) {
+        foreach ($posts['image'] as $post) {
             $posts['posts'][$post_index] = $post;
             $post_index++;
         }
-        foreach ($posts['image_two'] as $post) {
-            $posts['posts'][$post_index] = $post;
-            $post_index++;
-        }
-        foreach ($posts['image_three'] as $post) {
-            $posts['posts'][$post_index] = $post;
-            $post_index++;
-        }
-        foreach ($posts['image_four'] as $post) {
-            $posts['posts'][$post_index] = $post;
-            $post_index++;
-        }
-        foreach ($posts['image_five'] as $post) {
-            $posts['posts'][$post_index] = $post;
-            $post_index++;
-        }
-        foreach ($posts['image_six'] as $post) {
-            $posts['posts'][$post_index] = $post;
-            $post_index++;
-        }
-
-        foreach ($posts['video_one'] as $post) {
-            $posts['posts'][$post_index] = $post;
-            $post_index++;
-        }
-        foreach ($posts['video_two'] as $post) {
-            $posts['posts'][$post_index] = $post;
-            $post_index++;
-        }
-        foreach ($posts['video_three'] as $post) {
-            $posts['posts'][$post_index] = $post;
-            $post_index++;
-        }
-        foreach ($posts['video_four'] as $post) {
-            $posts['posts'][$post_index] = $post;
-            $post_index++;
-        }
-        foreach ($posts['video_five'] as $post) {
-            $posts['posts'][$post_index] = $post;
-            $post_index++;
-        }
-        foreach ($posts['video_six'] as $post) {
+        foreach ($posts['video'] as $post) {
             $posts['posts'][$post_index] = $post;
             $post_index++;
         }
 
         $posts['all_posts'] = collect($posts['posts'])->sortBy('created_at')->reverse();
 
-        return view('admin.activity',compact('activities','blogs','posts'));
+        return view('admin.activity', compact('activities', 'blogs', 'posts'));
+    }
+
+    public function analytics()
+    {
+        $views['website'] = WebsiteView::all()->count();
+        $views['blog'] = BlogView::all()->count();
+        $views['post'] = View::all()->count();
+
+        $images = View::select('post_id')
+                        ->groupBy('post_id')
+                        ->orderByRaw('COUNT(post_id) DESC')
+                        ->get();
+
+
+
+        $count = View::where('post_id', $images[1]->post_id)->count();
+
+        dd($count);
+
+        $count = [];
+        $index = 0;
+        foreach ($images as $image)
+        {
+            $count[$index++] = View::where('post_id', $image->post_id)
+                                    ->count();
+        }
+
+
+        dd($count);
+
+        return view('admin.analytics', compact('views'));
     }
 
     public function adminPostDelete(Request $request)
     {
-        switch ($request->template_id) {
-            case 1:
-                $template_id = "One";
-                break;
-            case 2:
-                $template_id = "Two";
-                break;
-            case 3:
-                $template_id = "Three";
-                break;
-            case 4:
-                $template_id = "Four";
-                break;
-            case 5:
-                $template_id = "Five";
-                break;
-            case 6:
-                $template_id = "Six";
-                break;
+        $model = 'App\Models\\' . ucfirst($request->template_type);
+        $post = $model::where('slug', $request->slug)->first();
+
+        abort_if($post == null, 404);
+
+        foreach ($post->medias as $media) {
+            unlink($media->address); // Image
         }
 
-        $model = 'App\Models\\' . ucwords($request->template_type) . 'PostTemplate' . $template_id;
-        $post = $model::where('id', $request->post_id)->first();
-
-        abort_if($post == null,404);
-
-        if (isset($post->fimage))
+        if ($post->address)
         {
-            unlink('upload/blogger_image_post/'.$post->fimage);
-        }
-        if (isset($post->video) AND $post->video != null)
-        {
-            unlink('upload/blogger_video_post/'. $request->blogger_id.'/'.$post->video);
-        }
-        if (isset($post->product_background_image) AND $post->product_background_image != null)
-        {
-            unlink('upload/blogger_image_post/'.$post->product_background_image);
-        }
-        if (isset($post->product_background) AND $post->product_background != null)
-        {
-            unlink('upload/blogger_image_post/'.$post->product_background);
-        }
-
-        if (isset($post->article_image1) AND $post->article_image1 != null)
-        {
-            unlink('upload/blogger_image_post/'.$post->article_image1);
-        }
-        if (isset($post->article_image2) AND $post->article_image2 != null)
-        {
-            unlink('upload/blogger_image_post/'.$post->article_image2);
-        }
-        if (isset($post->article_image3) AND $post->article_image3 != null)
-        {
-            unlink('upload/blogger_image_post/'.$post->article_image3);
-        }
-        if (isset($post->article_image4) AND $post->article_image4 != null)
-        {
-            unlink('upload/blogger_image_post/'.$post->article_image4);
-        }
-        if (isset($post->article_image5) AND $post->article_image5 != null)
-        {
-            unlink('upload/blogger_image_post/'.$post->article_image5);
-        }
-        if (isset($post->article_image6) AND $post->article_image6 != null)
-        {
-            unlink('upload/blogger_image_post/'.$post->article_image6);
-        }
-
-        if (isset($post->image1) AND $post->image1 != null)
-        {
-            unlink('upload/blogger_image_post/'.$post->image1);
-        }
-        if (isset($post->image2) AND $post->image2 != null)
-        {
-            unlink('upload/blogger_image_post/'.$post->image2);
-        }
-        if (isset($post->image3) AND $post->image3 != null)
-        {
-            unlink('upload/blogger_image_post/'.$post->image3);
-        }
-        if (isset($post->image4) AND $post->image4 != null)
-        {
-            unlink('upload/blogger_image_post/'.$post->image4);
-        }
-        if (isset($post->image5) AND $post->image5 != null)
-        {
-            unlink('upload/blogger_image_post/'.$post->image5);
-        }
-        if (isset($post->image6) AND $post->image6 != null)
-        {
-            unlink('upload/blogger_image_post/'.$post->image6);
-        }
-
-        if (isset($post->bottom_image) AND $post->bottom_image != null)
-        {
-            unlink('upload/blogger_image_post/'.$post->bottom_image);
-        }
-        if (isset($post->outro_image) AND $post->outro_image != null)
-        {
-            unlink('upload/blogger_image_post/'.$post->outro_image);
-        }
-
-        if (isset($post->bottom_image1) AND $post->bottom_image1 != null)
-        {
-            unlink('upload/blogger_image_post/'.$post->bottom_image1);
-        }
-        if (isset($post->bottom_image2) AND $post->bottom_image2 != null)
-        {
-            unlink('upload/blogger_image_post/'.$post->bottom_image2);
-        }
-        if (isset($post->bottom_image3) AND $post->bottom_image3 != null)
-        {
-            unlink('upload/blogger_image_post/'.$post->bottom_image3);
+            unlink($post->address); // Video
         }
 
         $products = BloggerProduct::where('blogger_id', $request->blogger_id)->get();
@@ -611,70 +408,59 @@ class AdminController extends Controller
             $product->delete();
         }
 
-        $saved = SavePost::where('post_user_id', $request->blogger_id)
-            ->where('template_type', $request->template_type)
-            ->where('template_id', $request->template_id)
-            ->where('post_id', $request->post_id)
-            ->first();
-
-        if ($saved != null) {
-            $saved->delete();
-        }
-
-        $likes = Like::where('post_user_id', $request->blogger_id)
-            ->where('template_type', $request->template_type)
-            ->where('template_id', $request->template_id)
-            ->where('post_id', $request->post_id)
-            ->first();
-
-        if ($likes != null) {
-            $likes->delete();
-        }
-
-        $comments = Comments::where('post_user_id', $request->blogger_id)
-            ->where('template_type', $request->template_type)
-            ->where('template_id', $request->template_id)
-            ->where('post_id', $request->post_id)
+        $saved = SavePost::where('template_type', $request->template_type)
+            ->where('post_id', $post->id)
             ->get();
 
-        foreach ($comments as $comment) {
-            $comment->delete();
+        if ($saved != null)
+        {
+            foreach ($saved as $save)
+            {
+                $save->delete();
+            }
         }
 
-        $views = View::where('blogger_id', $request->blogger_id)
-            ->where('template_type', $request->template_type)
-            ->where('template_id', $request->template_id)
-            ->where('post_id', $request->post_id)
+        $likes = Like::where('template_type', $request->template_type)
+            ->where('post_id', $post->id)
             ->get();
 
-        foreach ($views as $view) {
-            $view->delete();
+        if ($likes != null)
+        {
+            foreach ($likes as $like)
+            {
+                $like->delete();
+            }
         }
 
-        $clicks = Click::where('blogger_id', $request->blogger_id)
-            ->where('template_type', $request->template_type)
-            ->where('template_id', $request->template_id)
-            ->where('post_id', $request->post_id)
+        // Comments will auto delete
+
+        $views = View::where('template_type', $request->template_type)
+            ->where('post_id', $post->id)
             ->get();
 
-        foreach ($clicks as $click) {
-            $click->delete();
+        if ($views != null)
+        {
+            foreach ($views as $view)
+            {
+                $view->delete();
+            }
         }
 
-        $notify = NotifyAdmin::where('blogger_id', $request->blogger_id)
-            ->where('template_type', $request->template_type)
-            ->where('template_id', $request->template_id)
-            ->where('post_id', $request->post_id)
-            ->first();
+        $clicks = Click::where('template_type', $request->template_type)
+            ->where('post_id', $post->id)
+            ->get();
 
-        if ($notify != null) {
-            $notify->delete();
+        if ($clicks != null)
+        {
+            foreach ($clicks as $click)
+            {
+                $click->delete();
+            }
         }
 
-        $taggables = DB::table('taggables')->where('blogger_id', $request->blogger_id)
-            ->where('taggable_id', $request->post_id)
-            ->where('taggable_type', $model)
-            ->delete();
+        // Notify Admin Table Data will auto delete
+
+        $post->categories()->detach();
 
         $post->delete();
 

@@ -33,16 +33,24 @@ Route::get('/', [App\Http\Controllers\IndexController::class, 'index'])->name('i
 Route::get('/latest-post', [App\Http\Controllers\IndexController::class, 'latestPost'])->name('latest.post');
 Route::get('/latest-videos', [App\Http\Controllers\IndexController::class, 'latestVideo'])->name('latest.video');
 Route::get('/most-viewed', [App\Http\Controllers\IndexController::class, 'viewed'])->name('viewed');
-Route::get('/post/{template_type}/{template_id}/{slug}', [App\Http\Controllers\IndexController::class, 'show'])->name('post.show');
+Route::get('/post/{template_type}/{slug}', [App\Http\Controllers\IndexController::class, 'show'])->name('post.show');
 Route::get('/categories', [App\Http\Controllers\IndexController::class, 'categories'])->name('categories');
 Route::get('/categories/{slug}', [App\Http\Controllers\IndexController::class, 'selectedCategories'])->name('categories.selected');
 Route::get('/blogs', [App\Http\Controllers\IndexController::class, 'blogs'])->name('blogs');
+Route::get('/blogs/country/{country}', [App\Http\Controllers\IndexController::class, 'country'])->name('blogs.country');
 Route::get('/videos', [App\Http\Controllers\IndexController::class, 'videos'])->name('videos');
 Route::get('/categories/video/{slug}', [App\Http\Controllers\IndexController::class, 'selectedCategoriesVideo'])->name('categories.selected.video');
 Route::get('/about', [App\Http\Controllers\IndexController::class, 'about'])->name('about');
 Route::get('/blogs/{slug}', [App\Http\Controllers\IndexController::class, 'blog'])->name('blog');
 
 Route::post('/views/count', [App\Http\Controllers\ClickViewController::class, 'views'])->name('views');
+Route::post('/website-views/count', [App\Http\Controllers\ClickViewController::class, 'website_views'])->name('website.views');
+Route::post('/blog-views/count', [App\Http\Controllers\ClickViewController::class, 'blog_views'])->name('blog.views');
+
+Route::get('/search', function (){
+    abort(404);
+});
+Route::post('/search', [App\Http\Controllers\IndexController::class, 'search'])->name('search.post');
 
 /* ---------------------------------------------------------------------------------------------- */
 /* User Login , Registration , Password Reset */
@@ -69,6 +77,9 @@ Route::prefix('user')->middleware(['auth:web','verified'])->group(function(){
         /* Saving Blog Post */
         Route::get('/saved', [App\Http\Controllers\UserControllers\UserController::class, 'saved'])->name('user.saved');
         Route::post('/save/{template_type}/{template_id}', [App\Http\Controllers\SavePostController::class, 'save'])->name('user.post.save');
+
+        /* Watch Later Blog Post */
+//        Route::get('/watch-later', [App\Http\Controllers\UserControllers\UserController::class, 'watch'])->name('user.watch');
 
         /* Post Collection */
         Route::get('/collection', [App\Http\Controllers\UserControllers\PostCollectionController::class, 'index'])->name('user.collection');
@@ -109,6 +120,7 @@ Route::prefix('admin')->group(function(){
 Route::prefix('admin')->namespace('AdminControllers')->middleware('auth:admin')->group(function(){
     Route::get('/', function (){return redirect(route('admin.dashboard'));});
     Route::get('/dashboard', [App\Http\Controllers\AdminControllers\AdminController::class, 'index'])->name('admin.dashboard');
+    Route::post('/dashboard', [App\Http\Controllers\AdminControllers\AdminController::class, 'index'])->name('admin.dashboard');
     Route::get('/blogs', [App\Http\Controllers\AdminControllers\AdminController::class, 'blogs'])->name('admin.blogs');
     Route::get('/blogs/pause/{slug}', [App\Http\Controllers\AdminControllers\AdminController::class, 'pauseBlog'])->name('admin.blogs.pause');
     Route::get('/blogs/delete/{slug}', [App\Http\Controllers\AdminControllers\AdminController::class, 'deleteBlog'])->name('admin.blogs.delete');
@@ -116,6 +128,11 @@ Route::prefix('admin')->namespace('AdminControllers')->middleware('auth:admin')-
     /* Activity Pages */
     Route::get('/activity', [App\Http\Controllers\AdminControllers\AdminController::class, 'activity'])->name('admin.activity');
     Route::post('/activity/post/delete', [App\Http\Controllers\AdminControllers\AdminController::class, 'adminPostDelete'])->name('admin.post.delete');
+
+    /* Analytics Pages */
+    Route::get('/analytics', [App\Http\Controllers\AdminControllers\AdminController::class, 'analytics'])->name('admin.analytics');
+    Route::post('/activity/post/delete', [App\Http\Controllers\AdminControllers\AdminController::class, 'adminPostDelete'])->name('admin.post.delete');
+
 
     /* Category Management */
     Route::get('/category', [App\Http\Controllers\AdminControllers\CategoryController::class, 'index'])->name('admin.category.index');
@@ -139,6 +156,10 @@ Route::prefix('admin')->namespace('AdminControllers')->middleware('auth:admin')-
     Route::post('/blogger/create', [App\Http\Controllers\AdminControllers\CreateBloggerController::class, 'sent'])->name('admin.blogger.sent');
     Route::get('/blogger/create/again/{email}', [App\Http\Controllers\AdminControllers\CreateBloggerController::class, 'sentagain'])->name('admin.blogger.sent.again');
     Route::get('/blogger/{id}', [App\Http\Controllers\AdminControllers\CreateBloggerController::class, 'giveapproval'])->name('admin.blogger.account.giveapproval');
+
+    /* User Management */
+    Route::get('/user/{id}', [App\Http\Controllers\AdminControllers\CreateUserController::class, 'giveapproval'])->name('admin.user.account.giveapproval');
+    Route::get('/user/delete/{id}', [App\Http\Controllers\AdminControllers\AdminController::class, 'deleteUser'])->name('admin.user.delete');
 });
 
 Route::get('/blogger/account/{token}', [App\Http\Controllers\AdminControllers\CreateBloggerController::class, 'compare'])->name('admin.blogger.account.compare')->middleware('checkinvitetoken');
@@ -185,7 +206,7 @@ Route::prefix('blogger')->middleware(['auth:blogger'])->group(function(){
         });
 
         /* Dashboard */
-        Route::middleware('hasblog')->group(function(){
+        Route::middleware(['hasblog','blogger_online'])->group(function(){
             Route::get('/dashboard', [App\Http\Controllers\BloggerControllers\BloggerController::class, 'index'])->name('blogger.dashboard');
             Route::get('/overview', [App\Http\Controllers\BloggerControllers\BloggerController::class, 'overview'])->name('blogger.overview');
             Route::post('/overview/post', [App\Http\Controllers\HideUnhideController::class, 'hide_post'])->name('blogger.overview.hide.post');
@@ -210,37 +231,37 @@ Route::prefix('blogger')->middleware(['auth:blogger'])->group(function(){
             Route::post('/blog/post/image/template1/edit/{slug}', [App\Http\Controllers\BloggerControllers\ImagePostController::class, 'update'])->name('blogger.blog.post.image.update.1');
 
             /* Post - Image Post Two */
-            Route::get('/blog/post/image/template2', [App\Http\Controllers\BloggerControllers\ImagePostTwoController::class, 'ImagePostIndexTwo'])->name('blogger.blog.post.image.index.2');
-            Route::post('/blog/post/image/template2/store', [App\Http\Controllers\BloggerControllers\ImagePostTwoController::class, 'ImagePostStoreTwo'])->name('blogger.blog.post.image.store.2');
-            Route::get('/blog/post/image/template2/show/{slug}', [App\Http\Controllers\BloggerControllers\ImagePostTwoController::class, 'ImagePostShowTwo'])->name('blogger.blog.post.image.show.2');
+            Route::get('/blog/post/image/template2', [App\Http\Controllers\BloggerControllers\ImagePostController::class, 'index2'])->name('blogger.blog.post.image.index.2');
+            Route::post('/blog/post/image/template2/store', [App\Http\Controllers\BloggerControllers\ImagePostController::class, 'store'])->name('blogger.blog.post.image.store.2');
+            Route::get('/blog/post/image/template2/show/{slug}', [App\Http\Controllers\BloggerControllers\ImagePostController::class, 'show'])->name('blogger.blog.post.image.show.2');
             Route::get('/blog/post/image/template2/edit/{id}', [App\Http\Controllers\BloggerControllers\ImagePostTwoController::class, 'ImagePostEditTwo'])->name('blogger.blog.post.image.edit.2');
             Route::post('/blog/post/image/template2/edit/{id}', [App\Http\Controllers\BloggerControllers\ImagePostTwoController::class, 'ImagePostUpdateTwo'])->name('blogger.blog.post.image.update.2');
 
             /* Post - Image Post Three */
-            Route::get('/blog/post/image/template3', [App\Http\Controllers\BloggerControllers\ImagePostThreeController::class, 'ImagePostIndexThree'])->name('blogger.blog.post.image.index.3');
-            Route::post('/blog/post/image/template3/store', [App\Http\Controllers\BloggerControllers\ImagePostThreeController::class, 'ImagePostStoreThree'])->name('blogger.blog.post.image.store.3');
-            Route::get('/blog/post/image/template3/show/{slug}', [App\Http\Controllers\BloggerControllers\ImagePostThreeController::class, 'ImagePostShowThree'])->name('blogger.blog.post.image.show.3');
+            Route::get('/blog/post/image/template3', [App\Http\Controllers\BloggerControllers\ImagePostController::class, 'index3'])->name('blogger.blog.post.image.index.3');
+            Route::post('/blog/post/image/template3/store', [App\Http\Controllers\BloggerControllers\ImagePostController::class, 'store'])->name('blogger.blog.post.image.store.3');
+            Route::get('/blog/post/image/template3/show/{slug}', [App\Http\Controllers\BloggerControllers\ImagePostController::class, 'show'])->name('blogger.blog.post.image.show.3');
             Route::get('/blog/post/image/template3/edit/{id}', [App\Http\Controllers\BloggerControllers\ImagePostThreeController::class, 'ImagePostEditThree'])->name('blogger.blog.post.image.edit.3');
             Route::post('/blog/post/image/template3/edit/{id}', [App\Http\Controllers\BloggerControllers\ImagePostThreeController::class, 'ImagePostUpdateThree'])->name('blogger.blog.post.image.update.3');
 
             /* Post - Image Post Four */
-            Route::get('/blog/post/image/template4', [App\Http\Controllers\BloggerControllers\ImagePostFourController::class, 'ImagePostIndexFour'])->name('blogger.blog.post.image.index.4');
-            Route::post('/blog/post/image/template4/store', [App\Http\Controllers\BloggerControllers\ImagePostFourController::class, 'ImagePostStoreFour'])->name('blogger.blog.post.image.store.4');
-            Route::get('/blog/post/image/template4/show/{slug}', [App\Http\Controllers\BloggerControllers\ImagePostFourController::class, 'ImagePostShowFour'])->name('blogger.blog.post.image.show.4');
+            Route::get('/blog/post/image/template4', [App\Http\Controllers\BloggerControllers\ImagePostController::class, 'index4'])->name('blogger.blog.post.image.index.4');
+            Route::post('/blog/post/image/template4/store', [App\Http\Controllers\BloggerControllers\ImagePostController::class, 'store'])->name('blogger.blog.post.image.store.4');
+            Route::get('/blog/post/image/template4/show/{slug}', [App\Http\Controllers\BloggerControllers\ImagePostController::class, 'show'])->name('blogger.blog.post.image.show.4');
             Route::get('/blog/post/image/template4/edit/{id}', [App\Http\Controllers\BloggerControllers\ImagePostFourController::class, 'ImagePostEditFour'])->name('blogger.blog.post.image.edit.4');
             Route::post('/blog/post/image/template4/edit/{id}', [App\Http\Controllers\BloggerControllers\ImagePostFourController::class, 'ImagePostUpdateFour'])->name('blogger.blog.post.image.update.4');
 
             /* Post - Image Post Five */
-            Route::get('/blog/post/image/template5', [App\Http\Controllers\BloggerControllers\ImagePostFiveController::class, 'ImagePostIndexFive'])->name('blogger.blog.post.image.index.5');
-            Route::post('/blog/post/image/template5/store', [App\Http\Controllers\BloggerControllers\ImagePostFiveController::class, 'ImagePostStoreFive'])->name('blogger.blog.post.image.store.5');
-            Route::get('/blog/post/image/template5/show/{slug}', [App\Http\Controllers\BloggerControllers\ImagePostFiveController::class, 'ImagePostShowFive'])->name('blogger.blog.post.image.show.5');
+            Route::get('/blog/post/image/template5', [App\Http\Controllers\BloggerControllers\ImagePostController::class, 'index5'])->name('blogger.blog.post.image.index.5');
+            Route::post('/blog/post/image/template5/store', [App\Http\Controllers\BloggerControllers\ImagePostController::class, 'store'])->name('blogger.blog.post.image.store.5');
+            Route::get('/blog/post/image/template5/show/{slug}', [App\Http\Controllers\BloggerControllers\ImagePostController::class, 'show'])->name('blogger.blog.post.image.show.5');
             Route::get('/blog/post/image/template5/edit/{id}', [App\Http\Controllers\BloggerControllers\ImagePostFiveController::class, 'ImagePostEditFive'])->name('blogger.blog.post.image.edit.5');
             Route::post('/blog/post/image/template5/edit/{id}', [App\Http\Controllers\BloggerControllers\ImagePostFiveController::class, 'ImagePostUpdateFive'])->name('blogger.blog.post.image.update.5');
 
             /* Post - Image Post Six */
-            Route::get('/blog/post/image/template6', [App\Http\Controllers\BloggerControllers\ImagePostSixController::class, 'ImagePostIndexSix'])->name('blogger.blog.post.image.index.6');
-            Route::post('/blog/post/image/template6/store', [App\Http\Controllers\BloggerControllers\ImagePostSixController::class, 'ImagePostStoreSix'])->name('blogger.blog.post.image.store.6');
-            Route::get('/blog/post/image/template6/show/{slug}', [App\Http\Controllers\BloggerControllers\ImagePostSixController::class, 'ImagePostShowSix'])->name('blogger.blog.post.image.show.6');
+            Route::get('/blog/post/image/template6', [App\Http\Controllers\BloggerControllers\ImagePostController::class, 'index6'])->name('blogger.blog.post.image.index.6');
+            Route::post('/blog/post/image/template6/store', [App\Http\Controllers\BloggerControllers\ImagePostController::class, 'store'])->name('blogger.blog.post.image.store.6');
+            Route::get('/blog/post/image/template6/show/{slug}', [App\Http\Controllers\BloggerControllers\ImagePostController::class, 'show'])->name('blogger.blog.post.image.show.6');
             Route::get('/blog/post/image/template6/edit/{id}', [App\Http\Controllers\BloggerControllers\ImagePostSixController::class, 'ImagePostEditSix'])->name('blogger.blog.post.image.edit.6');
             Route::post('/blog/post/image/template6/edit/{id}', [App\Http\Controllers\BloggerControllers\ImagePostSixController::class, 'ImagePostUpdateSix'])->name('blogger.blog.post.image.update.6');
 
@@ -293,11 +314,17 @@ Route::prefix('blogger')->middleware(['auth:blogger'])->group(function(){
                 abort(404);
             });
 
+            /* Image Post Delete */
+            Route::post('/blog/post/image/delete/{slug}', [App\Http\Controllers\BloggerControllers\ImagePostController::class, 'destroy'])->name('blogger.blog.post.image.delete');
+            Route::get('/blog/post/image/delete/{slug}', function (){
+                abort(404);
+            });
+
             /* Post Delete */
 //            Route::post('/dashboard/post/delete', [App\Http\Controllers\BloggerControllers\BloggerController::class, 'postDelete'])->name('blogger.post.delete');
 
             /* Products */
-            Route::get('/blog/post/image/products', [App\Http\Controllers\BloggerControllers\BloggerProductController::class, 'getAllProducts'])->name('blogger.blog.post.image.products');
+            Route::get('/blog/post/image/products', [App\Http\Controllers\BloggerControllers\BloggerProductController::class, 'getAllProducts'])->name('blogger.blog.post.products');
 
             Route::get('/blog/product', [App\Http\Controllers\BloggerControllers\BloggerProductController::class, 'index'])->name('blogger.blog.product.index');
             Route::post('/blog/product', [App\Http\Controllers\BloggerControllers\BloggerProductController::class, 'store'])->name('blogger.blog.product.store');

@@ -8,6 +8,7 @@ use App\Models\Like;
 use App\Models\PostCollection;
 use App\Models\SavePost;
 use App\Models\User;
+use App\Models\Video;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Intervention\Image\Facades\Image;
@@ -23,73 +24,45 @@ class UserController extends Controller
     {
         $user_data['following_blogs'] = FollowBlogger::where('user_id', Auth::guard('web')->id())->get();
 
-        foreach ($user_data['following_blogs'] as $blog) {
-            $blogger_id = $blog->blog->blogger_id;
+        if (count($user_data['following_blogs']) > 0) {
+            foreach ($user_data['following_blogs'] as $blog) {
+                $blogger_id = $blog->blog->blogger_id;
 
-            for ($i = 1; $i < 7; $i++) {
-                switch ($i) {
-                    case 1:
-                        $template_id = "One";
-                        break;
-                    case 2:
-                        $template_id = "Two";
-                        break;
-                    case 3:
-                        $template_id = "Three";
-                        break;
-                    case 4:
-                        $template_id = "Four";
-                        break;
-                    case 5:
-                        $template_id = "Five";
-                        break;
-                    case 6:
-                        $template_id = "Six";
-                        break;
-                }
-
-                $model = 'App\Models\\' . 'ImagePostTemplate' . $template_id;
-                $posts[] = $model::where('blogger_id', $blogger_id)->orderBy('created_at', 'desc')->get();
+                $posts['image'] = \App\Models\Image::where('blogger_id', $blogger_id)->orderBy('created_at', 'desc')->get();
+                $posts['video'] = Video::where('blogger_id', $blogger_id)->orderBy('created_at', 'desc')->get();
             }
-            for ($i = 1; $i < 7; $i++) {
-                switch ($i) {
-                    case 1:
-                        $template_id = "One";
-                        break;
-                    case 2:
-                        $template_id = "Two";
-                        break;
-                    case 3:
-                        $template_id = "Three";
-                        break;
-                    case 4:
-                        $template_id = "Four";
-                        break;
-                    case 5:
-                        $template_id = "Five";
-                        break;
-                    case 6:
-                        $template_id = "Six";
-                        break;
-                }
 
-                $model = 'App\Models\\' . 'VideoPostTemplate' . $template_id;
-                $posts[] = $model::where('blogger_id', $blogger_id)->orderBy('created_at', 'desc')->get();
+            $post_index = 0;
+            foreach ($posts['image'] as $post) {
+                $posts['posts'][$post_index] = $post;
+                $post_index++;
             }
+            foreach ($posts['video'] as $post) {
+                $posts['posts'][$post_index] = $post;
+                $post_index++;
+            }
+
+            if (isset($posts['posts']) AND !empty($posts['posts']))
+            {
+                $user_data['latest_posts'] = collect($posts['posts'])->sortBy('created_at')->reverse();
+            }
+        } else {
+            $posts = null;
+            $user_data = null;
         }
 
-        $user_data['latest_posts'] = collect($posts)->sortBy('created_at');
-
-        return view('user.dashboard', compact('user_data'));
+        return view('user.dashboard', compact('user_data', 'posts'));
     }
 
-    public function settings()
+    public
+    function settings()
     {
         $user = User::where('id', Auth::guard('web')->user()->id)->first();
         return view('user.settings', compact('user'));
     }
 
-    public function settings_update(Request $request)
+    public
+    function settings_update(Request $request)
     {
         $user = User::where('id', $request->user()->id)->first();
         if ($request->has('image') and $request->image != null) {
@@ -125,43 +98,17 @@ class UserController extends Controller
             ->where('user_type', 'web')
             ->orderBy('created_at', 'desc')->get();
 
-        foreach ($likes as $key => $like)
-        {
-            switch ($like->template_id) {
-                case 1:
-                    $template_id = "One";
-                    break;
-                case 2:
-                    $template_id = "Two";
-                    break;
-                case 3:
-                    $template_id = "Three";
-                    break;
-                case 4:
-                    $template_id = "Four";
-                    break;
-                case 5:
-                    $template_id = "Five";
-                    break;
-                case 6:
-                    $template_id = "Six";
-                    break;
-            }
+        foreach ($likes as $key => $like) {
 
-            $model = 'App\Models\\' . $like->template_type . 'PostTemplate' . $template_id;
-            $posts[$key] = $model::where('id', $like->post_id)->orderBy('created_at', 'desc')->get();
+            $model = 'App\Models\\' . ucfirst($like->template_type);
+            $posts['posts'][$key] = $model::where('id', $like->post_id)->orderBy('created_at', 'desc')->first();
 
-            foreach ($posts[$key] as $like_time)
-            {
-                $like_time->liked_at = $like->created_at;
-            }
+            $posts['posts'][$key]->liked_at = $like->created_at;
         }
 
-        if(isset($posts))
-        {
-            $posts['liked_posts'] = collect($posts)->sortBy('liked_at');
-        }
-        else{
+        if (isset($posts)) {
+            $posts['liked_posts'] = collect($posts['posts'])->sortBy('liked_at');
+        } else {
             $posts = null;
         }
 
@@ -174,48 +121,59 @@ class UserController extends Controller
             ->where('user_type', 'web')
             ->orderBy('created_at', 'desc')->get();
 
-        foreach ($saves as $key => $save)
-        {
-            switch ($save->template_id) {
-                case 1:
-                    $template_id = "One";
-                    break;
-                case 2:
-                    $template_id = "Two";
-                    break;
-                case 3:
-                    $template_id = "Three";
-                    break;
-                case 4:
-                    $template_id = "Four";
-                    break;
-                case 5:
-                    $template_id = "Five";
-                    break;
-                case 6:
-                    $template_id = "Six";
-                    break;
-            }
+        foreach ($saves as $key => $save) {
+            $model = 'App\Models\\' . ucfirst($save->template_type);
+            $posts['posts'][$key] = $model::where('id', $save->post_id)->orderBy('created_at', 'desc')->first();
 
-            $model = 'App\Models\\' . $save->template_type . 'PostTemplate' . $template_id;
-            $posts[$key] = $model::where('id', $save->post_id)->orderBy('created_at', 'desc')->get();
+            $posts['posts'][$key]->saved_at = $save->created_at;
+        }
 
-            foreach ($posts[$key] as $save_time)
-            {
-                $save_time->saved_at = $save->created_at;
+        if (isset($posts)) {
+            $post_index = 0;
+            foreach ($posts['posts'] as $post) {
+                $posts['post'][$post_index] = $post;
+                $post_index++;
             }
         }
 
         if (isset($posts)) {
-            $posts['saved_posts'] = collect($posts)->sortBy('saved_at')->reverse();
-        }
-        else
-        {
+            $posts['saved_posts'] = collect($posts['post'])->sortBy('saved_at')->reverse();
+        } else {
             $posts = null;
         }
 
         $collections = PostCollection::where('user_id', Auth::guard('web')->user()->id)->get();
 
-        return view('user.saved', compact('posts','collections'));
+        return view('user.saved', compact('posts', 'collections'));
+    }
+
+    public function watch()
+    {
+        $saves = SavePost::where('user_id', Auth::guard('web')->user()->id)
+            ->where('user_type', 'web')
+            ->orderBy('created_at', 'desc')->get();
+
+        foreach ($saves as $key => $save) {
+            $model = 'App\Models\\' . ucfirst($save->template_type);
+            $posts['posts'][$key] = $model::where('id', $save->post_id)->orderBy('created_at', 'desc')->first();
+
+            $posts['posts'][$key]->saved_at = $save->created_at;
+        }
+
+        $post_index = 0;
+        foreach ($posts['posts'] as $post) {
+            $posts['post'][$post_index] = $post;
+            $post_index++;
+        }
+
+        if (isset($posts)) {
+            $posts['saved_posts'] = collect($posts['post'])->sortBy('saved_at')->reverse();
+        } else {
+            $posts = null;
+        }
+
+        $collections = PostCollection::where('user_id', Auth::guard('web')->user()->id)->get();
+
+        return view('user.watch', compact('posts', 'collections'));
     }
 }

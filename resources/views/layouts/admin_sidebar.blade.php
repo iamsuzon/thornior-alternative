@@ -1,3 +1,8 @@
+<style>
+    .main-content .vertical-sidebar .sidebar-content .seller-thumb .text-thumb span::before{
+        background: green;
+    }
+</style>
 <div class="vertical-sidebar" id="slideNav">
     <div class="sidebar-content">
         <div class="brand-logo">
@@ -24,7 +29,7 @@
                 <li><a href="{{route('admin.blogs')}}" @if(Route::currentRouteName() == 'admin.blogs')class="active" @endif><span><i class="fab fa-blogger-b"></i></span><span>Blogs</span></a></li>
                 <li><a href="#0"><span><i class="fas fa-book-open"></i></span><span>Ads</span></a></li>
                 <li><a href="#0"><span><i class="fas fa-book-open"></i></span><span>Pages</span></a></li>
-                <li><a href="#0"><span><i class="fas fa-list-ol"></i></span><span>Analytics</span></a></li>
+                <li><a href="{{route('admin.analytics')}}" @if(Route::currentRouteName() == 'admin.analytics')class="active" @endif><span><i class="fas fa-list-ol"></i></span><span>Analytics</span></a></li>
                 <li><a href="{{route('admin.activity')}}" @if(Route::currentRouteName() == 'admin.activity')class="active" @endif><span><i class="fas fa-gopuram"></i></span><span>Activity/Notifications</span></a></li>
 {{--                <li class="accordion" id="accordionExample">--}}
 {{--                    <a href="#0" class="headingOne" data-toggle="collapse" data-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">--}}

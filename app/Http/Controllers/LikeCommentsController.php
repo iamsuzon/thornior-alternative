@@ -12,20 +12,17 @@ class LikeCommentsController extends Controller
     public function like(Request $request, $template_type,$template_id)
     {
         $TEMPLATE_TYPE = ['image','video'];
-        $TEMPLATE_TOTAL_EACH = 6;
 
-        if (!in_array($template_type,$TEMPLATE_TYPE) OR $template_id > $TEMPLATE_TOTAL_EACH OR $template_id < 1)
-        {
-            abort(404);
-        }
+        abort_if(!in_array($template_type,$TEMPLATE_TYPE), 403);
 
         $user = $this->getUser($request);
 
-        $liked = Like::where('template_type',$template_type)->where(
-                'template_id',$template_id)->where(
-                'post_id',$request->post_id)->where(
-                'user_type',$user['user_guard'])->where(
-                'user_id',$user->id)->first();
+        $liked = Like::where('template_type',$template_type)
+            ->where('template_id',$template_id)
+            ->where('post_id',$request->post_id)
+            ->where('user_type',$user['user_guard'])
+            ->where('user_id',$user->id)
+            ->first();
 
         if ($liked != null)
         {
@@ -48,12 +45,9 @@ class LikeCommentsController extends Controller
     public function store(Request $request, $template_type,$template_id)
     {
         $TEMPLATE_TYPE = ['image','video'];
-        $TEMPLATE_TOTAL_EACH = 6;
 
-        if (!in_array($template_type,$TEMPLATE_TYPE) OR $template_id > $TEMPLATE_TOTAL_EACH OR $template_id < 1)
-        {
-            abort(404);
-        }
+        abort_if(!in_array($template_type,$TEMPLATE_TYPE), 404);
+
         if ($request->comment == null)
         {
             return back();
@@ -64,10 +58,19 @@ class LikeCommentsController extends Controller
         $comment = New Comments();
         $comment->template_type = $template_type;
         $comment->template_id = $template_id;
-        $comment->post_id = $request->post_id;
+
+        if (strtolower($template_type) == 'image')
+        {
+            $comment->image_id = $request->post_id;
+        }
+        else
+        {
+            $comment->video_id = $request->post_id;
+        }
+
         $comment->user_type = $user['user_guard'];
         $comment->user_id = $user->id;
-        $comment->post_user_id = $request->post_user_id;
+        $comment->post_owner_id = $request->post_user_id;
 
         $comment->comment = trim($request->comment);
         $comment->save();
@@ -77,7 +80,7 @@ class LikeCommentsController extends Controller
 
     public function getUser($request)
     {
-        if ($request->user('blogger') != null)
+        if ($request->user('blogger'))
         {
             $user = $request->user('blogger');
             $user['user_guard'] = 'blogger';

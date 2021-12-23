@@ -15,10 +15,12 @@ class CreateFAQsTable extends Migration
     {
         Schema::create('f_a_qs', function (Blueprint $table) {
             $table->id();
-            $table->integer('blog_id');
+            $table->unsignedBigInteger('blog_id');
             $table->string('question');
             $table->longText('answer');
             $table->timestamps();
+
+            $table->foreign('blog_id')->references('id')->on('all_blogs')->onDelete('cascade')->onUpdate('cascade');
         });
     }
 

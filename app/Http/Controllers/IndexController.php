@@ -8,6 +8,7 @@ use App\Models\BlogAbout;
 use App\Models\Blogger;
 use App\Models\BloggerProduct;
 use App\Models\Category;
+use App\Models\Country;
 use App\Models\FAQs;
 use App\Models\HideUnhide;
 use App\Models\Image;
@@ -38,24 +39,13 @@ class IndexController extends Controller
     {
         $LIMIT = 10;
 
-        $posts['posts'] = $this->allpost($LIMIT);
-
-        if (!isset($posts['posts'])) {
-            return view('welcome2');
-        }
-
-        $posts['image'] = Image::orderBy('created_at', 'DESC')->limit(10)->get();
-        $posts['video'] = Video::orderBy('created_at', 'DESC')->limit(10)->get();
-        $posts['posts'] = $this->allpost($LIMIT);
+        $posts['image'] = Image::orderBy('created_at', 'DESC')->get();
+        $posts['video'] = Video::orderBy('created_at', 'DESC')->get();
+        $posts['posts'] = $this->allpost($posts['image'],$posts['video'],$LIMIT);
         $posts['view'] = $this->mostviewd();
 
-//        if (count($posts['posts']) < 10) {
-//            $LIMIT = 2;
-//            $posts['posts'] = $this->allpost($LIMIT);
-//        }
-
         $posts['latestPost'] = collect($posts['posts'])->sortBy('created_at')->reverse();
-//        $posts['allPost'] = $posts['latestPost'];
+        $posts['allPost'] = collect($posts['posts'])->sortBy('created_at')->reverse();
         $posts['mostViewed'] = collect($posts['view'])->sortBy('created_at')->reverse();
         $posts['blogs'] = AllBlogs::all();
 
@@ -66,18 +56,15 @@ class IndexController extends Controller
         return view('welcome2', compact('posts'));
     }
 
-    public function allpost($LIMIT)
+    public function allpost($image,$video,$LIMIT)
     {
-        $posts['image'] = Image::orderBy('created_at', 'DESC')->limit($LIMIT)->get();
-        $posts['video'] = Video::orderBy('created_at', 'DESC')->limit($LIMIT)->get();
-
         $post_index = 0;
         $posts['posts'] = null;
-        foreach ($posts['image'] as $post) {
+        foreach ($image as $post) {
             $posts['posts'][$post_index] = $post;
             $post_index++;
         }
-        foreach ($posts['video'] as $post) {
+        foreach ($video as $post) {
             $posts['posts'][$post_index] = $post;
             $post_index++;
         }
@@ -87,18 +74,19 @@ class IndexController extends Controller
 
     public function mostviewd()
     {
-        $views = View::orderBy('view_count', 'desc')->limit(24)->get();
-        $views = $views->unique(['post_id']);
+        $views = View::orderBy('id', 'desc')->limit(24)->get();
+        $views['views'] = $views->unique(['post_id']);
 
-        if ($views->count() == 0)
+        if ($views['views']->count() == 0)
         {
             return null;
         }
 
         $index = 1;
-        foreach ($views as $view) {
+        foreach ($views['views'] as $view) {
 
-            $model = 'App\Models\\' . ucfirst($view->template_type);
+            $TEMPLATE_TYPE = ucfirst($view->template_type);
+            $model = 'App\Models\\' . $TEMPLATE_TYPE ;
 
             $posts[$view->template_type.$index] = $model::where('id', $view->post_id)->orderBy('created_at', 'desc')->get();
 
@@ -107,7 +95,6 @@ class IndexController extends Controller
                 $posts['view'][$index] = $post;
                 $index++;
             }
-
 
             if(!isset($posts['view']))
             {
@@ -118,47 +105,24 @@ class IndexController extends Controller
         return $posts['view'];
     }
 
-    public function show($template_type, $template_id, $slug)
+    public function show($template_type, $slug)
     {
         $TEMPLATE_TYPE = ['image', 'video'];
-        $TEMPLATE_TOTAL_EACH = 6;
 
-        if (!in_array($template_type, $TEMPLATE_TYPE) or $template_id > $TEMPLATE_TOTAL_EACH or $template_id < 1) {
-            abort(404);
-        }
+        abort_if(!in_array($template_type, $TEMPLATE_TYPE), 404);
 
-        switch ($template_id) {
-            case 1:
-                $template_id = "One";
-                break;
-            case 2:
-                $template_id = "Two";
-                break;
-            case 3:
-                $template_id = "Three";
-                break;
-            case 4:
-                $template_id = "Four";
-                break;
-            case 5:
-                $template_id = "Five";
-                break;
-            case 6:
-                $template_id = "Six";
-                break;
-        }
-
-        $model = 'App\Models\\' . ucwords($template_type) . 'PostTemplate' . $template_id;
+        $model = 'App\Models\\' . ucwords($template_type);
         $post['post'] = $model::where('slug', $slug)->first();
-        if ($post['post'] == null) {
-            abort(404);
-        }
+
+        abort_if($post['post'] == null, 404);
+
         $post['products'] = BloggerProduct::where('blogger_id', $post['post']->blogger->id)
             ->where('post_id', $post['post']->id)
-            ->where('template_id', $post['post']->template_id)
+            ->where('post_slug', $post['post']->slug)
             ->where('post_type', $post['post']->post_type)
             ->get();
-        $post['related_posts'] = $model::where('id', '!=', $post['post']->id)->inRandomOrder()->get();
+
+        $post['related_posts'] = $model::where('id', '!=', $post['post']->slug)->inRandomOrder()->limit(6)->get();
 
         $post['like'] = $this->checkLike($post['post']);
         $post['save'] = $this->checkSave($post['post']);
@@ -222,9 +186,7 @@ class IndexController extends Controller
 
     public function selectedCategories($slug)
     {
-        if (Category::where('slug', $slug)->exists() == false) {
-            abort(404);
-        }
+        abort_if(Category::where('slug', $slug)->exists() == false, 404);
 
         $category = Category::where('slug',$slug)->first();
 
@@ -250,40 +212,12 @@ class IndexController extends Controller
 
     public function selectedCategoriesVideo($slug)
     {
-        if (Category::where('slug', $slug)->exists() == false) {
-            abort(404);
-        }
+        abort_if(Category::where('slug', $slug)->exists() == false, 404);
 
-
-        for ($j = 1; $j <= 6; $j++) {
-            $relation_name = 'video_post_' . $j;
-            $index_name = 'video' . '_' . $j . '';
-
-            $posts[$index_name] = Category::where('slug', strtolower($slug))->first()->$relation_name;
-        }
+        $category = Category::where('slug',$slug)->first();
 
         $post_index = 0;
-        foreach ($posts['video_1'] as $post) {
-            $posts['posts'][$post_index] = $post;
-            $post_index++;
-        }
-        foreach ($posts['video_2'] as $post) {
-            $posts['posts'][$post_index] = $post;
-            $post_index++;
-        }
-        foreach ($posts['video_3'] as $post) {
-            $posts['posts'][$post_index] = $post;
-            $post_index++;
-        }
-        foreach ($posts['video_4'] as $post) {
-            $posts['posts'][$post_index] = $post;
-            $post_index++;
-        }
-        foreach ($posts['video_5'] as $post) {
-            $posts['posts'][$post_index] = $post;
-            $post_index++;
-        }
-        foreach ($posts['video_6'] as $post) {
+        foreach ($category->video as $post) {
             $posts['posts'][$post_index] = $post;
             $post_index++;
         }
@@ -300,55 +234,44 @@ class IndexController extends Controller
     public function blogs()
     {
         $blogs = Blogger::all();
-        return view('blogs', compact('blogs'));
+        $countries = DB::table('countries')
+            ->join('bloggers', 'bloggers.region', '=', 'countries.code')
+            ->select('countries.*')
+            ->get();
+
+        return view('blogs', compact('blogs', 'countries'));
     }
 
-    public function allVideos()
+    public function country($country)
     {
-        $posts['video_one'] = VideoPostTemplateOne::orderBy('created_at', 'DESC')->get();
-        $posts['video_two'] = VideoPostTemplateTwo::orderBy('created_at', 'DESC')->get();
-        $posts['video_three'] = VideoPostTemplateThree::orderBy('created_at', 'DESC')->get();
-        $posts['video_four'] = VideoPostTemplateFour::orderBy('created_at', 'DESC')->get();
-        $posts['video_five'] = VideoPostTemplateFive::orderBy('created_at', 'DESC')->get();
-        $posts['video_six'] = VideoPostTemplateSix::orderBy('created_at', 'DESC')->get();
+        abort_if(Country::where('code',$country)->first() == null, 404);
 
-        $post_index = 0;
-        $posts['posts'] = null;
+        $countries = DB::table('countries')
+            ->join('bloggers', 'bloggers.region', '=', 'countries.code')
+            ->select('countries.*')
+            ->get();
 
-        foreach ($posts['video_one'] as $post) {
-            $posts['posts'][$post_index] = $post;
-            $post_index++;
-        }
-        foreach ($posts['video_two'] as $post) {
-            $posts['posts'][$post_index] = $post;
-            $post_index++;
-        }
-        foreach ($posts['video_three'] as $post) {
-            $posts['posts'][$post_index] = $post;
-            $post_index++;
-        }
-        foreach ($posts['video_four'] as $post) {
-            $posts['posts'][$post_index] = $post;
-            $post_index++;
-        }
-        foreach ($posts['video_five'] as $post) {
-            $posts['posts'][$post_index] = $post;
-            $post_index++;
-        }
-        foreach ($posts['video_six'] as $post) {
-            $posts['posts'][$post_index] = $post;
-            $post_index++;
-        }
+        $blogs = Blogger::where('region', $country)->get();
 
-        return $posts['posts'];
+        return view('country_blogs', compact('blogs', 'countries'));
     }
+
+//    public function allVideos()
+//    {
+//        $posts['video_one'] = Video::orderBy('created_at', 'DESC')->get();
+//
+//        $post_index = 0;
+//        $posts['posts'] = null;
+//
+//        return $posts['posts'];
+//    }
 
     public function videos()
     {
-        $posts['posts'] = $this->allVideos();
-        $posts['videos'] = collect($posts['posts'])->sortBy('created_at')->reverse();
+        $TEMPLATE_TYPE = 'Video';
+        $posts['videos'] = Video::orderBy('created_at', 'DESC')->get();
 
-        $posts['view'] = $this->mostviewd();
+        $posts['view'] = $this->mostviewd($TEMPLATE_TYPE);
         $posts['mostViewed'] = collect($posts['view'])->sortBy('created_at')->reverse();
         $posts['blogs'] = AllBlogs::all();
 
@@ -363,9 +286,7 @@ class IndexController extends Controller
     public function blog($slug)
     {
         $blog = AllBlogs::where('blog_slug', $slug)->first();
-        if ($blog == null) {
-            abort(404);
-        }
+        abort_if($blog == null, 404);
 
         $status = HideUnhide::where('blogger_id', $blog->blogger->id)->get();
         $about['about'] = BlogAbout::where('blog_id', $blog->id)->first();
@@ -378,6 +299,7 @@ class IndexController extends Controller
             ->select('categories.*', 'taggables.*')
             ->get();
 
+        $category_post = null;
         $i = 1;
         foreach ($posts['unique_categories'] as $category) {
             $category_post[$i] = $category->taggable_type::where('id', $category->taggable_id)
@@ -424,7 +346,9 @@ class IndexController extends Controller
 
     public function latestPost()
     {
-        $posts['posts'] = $this->allpost(100);
+        $posts['image'] = Image::orderBy('created_at', 'DESC')->get();
+        $posts['video'] = Video::orderBy('created_at', 'DESC')->get();
+        $posts['posts'] = $this->allpost($posts['image'],$posts['video'],10);
         $posts['latestPost'] = collect($posts['posts'])->sortBy('created_at')->reverse();
 
         return view('latestPost', compact('posts'));
@@ -439,9 +363,44 @@ class IndexController extends Controller
 
     public function latestVideo()
     {
-        $posts['posts'] = $this->allVideos();
-        $posts['latestPost'] = collect($posts['posts'])->sortBy('created_at')->reverse();
+        $posts['latestPost'] = Video::orderBy('created_at','DESC')->get();
 
         return view('latestVideo', compact('posts'));
+    }
+
+    public function search(Request $request)
+    {
+        $this->validate($request,[
+            'search' => 'required'
+        ]);
+
+        $images = Image::where('title', 'like', '%' . $request->search . '%')->get();
+        $videos = Video::where('title', 'like', '%' . $request->search . '%')->get();
+
+        $blogs = AllBlogs::where('blog_name', 'like', '%' . $request->search . '%')->get();
+
+        $search_query = $request->search;
+
+        if (($images->isEmpty()) AND ($videos->isEmpty()) AND ($blogs->isEmpty()))
+        {
+            return view('search', compact('search_query'));
+        }
+
+        $search_data = [];
+        $index = 0;
+
+        foreach ($images as $image)
+        {
+            $search_data[$index] = $image;
+            $index++;
+        }
+
+        foreach ($videos as $video)
+        {
+            $search_data[$index] = $video;
+            $index++;
+        }
+
+        return view('search', compact('blogs','search_data', 'search_query'));
     }
 }

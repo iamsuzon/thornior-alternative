@@ -13,11 +13,13 @@ class AllCollectionsController extends Controller
     public function store(Request $request)
     {
         abort_if(PostCollection::where('id',$request->collection_id)->exists() == false, 404);
+
         $EXISTS = AllCollections::where('template_type',$request->template_type)
                                 ->where('template_id',$request->template_id)
                                 ->where('post_id',$request->post_id)
                                 ->where('user_id',$request->user()->id)
                                 ->exists();
+
         if ($EXISTS == true) {
             $collection = AllCollections::where('template_type',$request->template_type)
                                         ->where('template_id',$request->template_id)

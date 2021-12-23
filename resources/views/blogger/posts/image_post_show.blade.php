@@ -10,6 +10,7 @@
     <title>Thornior</title>
 </head>
 <body>
+    @include('layouts.home_navbar')
     <!-- post top navbar start -->
     @include('templates.image.v'.$post['post']->template_id)
     <!-- Edit area ends  -->

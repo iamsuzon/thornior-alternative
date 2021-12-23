@@ -5,7 +5,7 @@
         function getProducts() {
             $.ajax({
                 type: 'GET',
-                url: '{{route('blogger.blog.post.image.products')}}',
+                url: '{{route('blogger.blog.post.products')}}',
                 dataType: 'JSON',
                 success: function (response) {
                     // console.log(response.products);

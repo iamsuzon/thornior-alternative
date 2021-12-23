@@ -200,14 +200,14 @@
                                 <div class="card-body">
                                     <div class="headline-1">
                                         <label for="first-headline"><strong>Intro Heading*</strong></label>
-                                        <input class="form-control" type="text" name="first_headline"
+                                        <input class="form-control" type="text" name="intro_headline"
                                                id="first-headline"
-                                               placeholder="Add Intro Heading" value="{{old('first_headline')}}">
+                                               placeholder="Add Intro Heading" value="{{old('intro_headline')}}">
                                     </div>
                                     <div class="first-description-box mt-2">
-                                                <textarea class="form-control" name="first_description"
+                                                <textarea class="form-control" name="intro_description"
                                                           id="first-description" rows="4"
-                                                          placeholder="Describe in details">{{old('first_description')}}</textarea>
+                                                          placeholder="Describe in details">{{old('intro_description')}}</textarea>
                                     </div>
                                 </div>
                             </div>
@@ -290,12 +290,12 @@
                                 <div class="card-body">
                                     <div class="headline-2 mt-3">
                                         <label for="last_headline"><strong>Outro Heading*</strong></label>
-                                        <input type="text" class="form-control" id="last_headline"
+                                        <input type="text" class="form-control" id="outro_headline"
                                                name="last_headline" placeholder="Add Outro Heading"
                                                value="{{old('last_headline')}}">
                                     </div>
                                     <div class="last-description-box mt-2">
-                                            <textarea class="form-control" id="last-description" name="last_description"
+                                            <textarea class="form-control" id="last-description" name="outro_description"
                                                       placeholder="Describe in details"
                                                       rows="4">{{old('last_description')}}</textarea>
                                     </div>

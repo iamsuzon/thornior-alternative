@@ -247,12 +247,12 @@
                                 <div class="card-body">
                                     <div class="headline-1">
                                         <label for="first-headline"><strong>Intro Heading*</strong></label>
-                                        <input class="form-control" type="text" name="first_headline"
+                                        <input class="form-control" type="text" name="intro_headline"
                                                id="first-headline"
                                                placeholder="Add Intro Heading" value="{{$post['post']->intro_header}}">
                                     </div>
                                     <div class="first-description-box mt-2">
-                                                <textarea class="form-control" name="first_description"
+                                                <textarea class="form-control" name="intro_description"
                                                           id="first-description" rows="4"
                                                           placeholder="Describe in details">{{$post['post']->intro_description}}</textarea>
                                     </div>

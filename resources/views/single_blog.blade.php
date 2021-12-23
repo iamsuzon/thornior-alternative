@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="{{ asset('js/app.js') }}" defer></script>
     <!-- All Styles -->
     @include('layouts.all_styles')
@@ -35,9 +36,11 @@
                     <div class="profile-content">
                         <div class="content-thumb">
                             <img src="{{asset('upload/blogger/avatar')}}/{{$blog->blogger->image}}" alt="">
-                            <div class="thumb-active">
-                                <i class="fa fa-check"></i>
-                            </div>
+                            @if(\Illuminate\Support\Facades\Cache::has('blogger-is-online-' . $blog->blogger->id))
+                                <div class="thumb-active">
+                                    <i class="fa fa-check"></i>
+                                </div>
+                            @endif
                         </div>
                         <div class="content-text">
                             <div class="row">
@@ -910,87 +913,40 @@
                     </div>
                     <div class="section-wrapper">
                         <div class="row">
-                            <div class="col-lg-4 col-md-6 col-12">
-                                <div class="blog-item">
-                                    <div class="item-thumb">
-                                        <img src="assets/images/blog/latest/01.jpg" alt="">
-                                        <div class="video-btn">
-                                            <a href="#0">
-                                                <i class="fa fa-play"></i>
-                                            </a>
+                            @foreach($posts['latestPost'] as $post)
+                                @break($loop->index == 4)
+                                <div class="col-lg-3 col-md-6 col-12">
+                                    <div class="blog-item">
+                                        <div class="item-thumb">
+                                            <img src="{{asset($post->medias[0]->address)}}" alt="" style="width: 100%; height: 200px">
+                                            @if($post->video)
+                                                <div class="video-btn">
+                                                    <a href="{{route('post.show',['template_type' => $post->post_type , 'slug' => $post->slug])}}">
+                                                        <i class="fa fa-play"></i>
+                                                    </a>
+                                                </div>
+                                            @endif
                                         </div>
-                                    </div>
-                                    <div class="blog-text">
-                                        <div class="blog-cat">
-                                            <span>Styling</span>
+                                        <div class="blog-text">
+                                            <div class="blog-cat">
+                                                <span
+                                                    class="bg-dark text-white">@foreach($post->categories as $category) {{$category->name}} @if($post->categories->count() > 1)
+                                                        +{{$post->categories->count()-1}}
+                                                        more @break @endif  @endforeach</span>
+                                            </div>
+                                            <div class="blog-timeline">
+                                                <strong>{{substr($post->blogger->name, 0, 15)}}..</strong>
+                                                <span class="me-1 ms-1">/</span>
+                                                <span>{{$post->created_at->format('d M Y')}}</span>
+                                            </div>
+                                            <p>@if($post->intro_description != null) {{$post->intro_description}} @else {{$post->outro_description}} @endif</p>
                                         </div>
-                                        <div class="blog-timeline">
-                                            <strong>Shay alnwick</strong>
-                                            <span class="me-1 ms-1">/</span>
-                                            <span>24 July 2017</span>
+                                        <div class="blog-more mt-3">
+                                            <a href="{{route('post.show',['template_type' => $post->post_type , 'slug' => $post->slug])}}">Read More <i class="fas fa-long-arrow-alt-right"></i></a>
                                         </div>
-                                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Suscipit voluptas
-                                            molestiae corporis rem magnam fuga quis minus, eligendi porro dolore.</p>
-                                    </div>
-                                    <div class="blog-more mt-3">
-                                        <a href="#0">Read More <i class="fas fa-long-arrow-alt-right"></i></a>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col-lg-4 col-md-6 col-12 mt-4 mt-md-0">
-                                <div class="blog-item">
-                                    <div class="item-thumb">
-                                        <img src="assets/images/blog/latest/01.jpg" alt="">
-                                        <div class="video-btn">
-                                            <a href="#0">
-                                                <i class="fa fa-play"></i>
-                                            </a>
-                                        </div>
-                                    </div>
-                                    <div class="blog-text">
-                                        <div class="blog-cat">
-                                            <span>Kitchen</span>
-                                        </div>
-                                        <div class="blog-timeline">
-                                            <strong>Shay alnwick</strong>
-                                            <span class="me-1 ms-1">/</span>
-                                            <span>24 July 2017</span>
-                                        </div>
-                                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Suscipit voluptas
-                                            molestiae corporis rem magnam fuga quis minus, eligendi porro dolore.</p>
-                                    </div>
-                                    <div class="blog-more mt-3">
-                                        <a href="#0">Read More <i class="fas fa-long-arrow-alt-right"></i></a>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-4 col-md-6 col-12 mt-4 mb-lg-0">
-                                <div class="blog-item">
-                                    <div class="item-thumb">
-                                        <img src="assets/images/blog/latest/01.jpg" alt="">
-                                        <div class="video-btn">
-                                            <a href="#0">
-                                                <i class="fa fa-play"></i>
-                                            </a>
-                                        </div>
-                                    </div>
-                                    <div class="blog-text">
-                                        <div class="blog-cat">
-                                            <span>Diy</span>
-                                        </div>
-                                        <div class="blog-timeline">
-                                            <strong>Shay alnwick</strong>
-                                            <span class="me-1 ms-1">/</span>
-                                            <span>24 July 2017</span>
-                                        </div>
-                                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Suscipit voluptas
-                                            molestiae corporis rem magnam fuga quis minus, eligendi porro dolore.</p>
-                                    </div>
-                                    <div class="blog-more mt-3">
-                                        <a href="#0">Read More <i class="fas fa-long-arrow-alt-right"></i></a>
-                                    </div>
-                                </div>
-                            </div>
+                            @endforeach
                         </div>
                     </div>
                 </div>
@@ -1002,46 +958,13 @@
 <!-- all profile tabs start -->
 
 <!-- footer area star -->
-<footer class="border-top pt-5">
-    <div class="container">
-        <div class="d-flex flex-wrap justify-content-md-between justify-content-center">
-            <div class="footer-menu">
-                <ul class="menulist list-unstyled d-flex align-items-center p-0 m-0">
-                    <li class="me-3"><a href="{{route('index')}}">Home</a></li>
-                    <li class="me-3"><a href="{{route('about')}}">About</a></li>
-                    <li class="me-3"><a href="{{route('blogs')}}">Creators</a></li>
-                    <li><a href="{{route('about')}}">Contact</a></li>
-                </ul>
-            </div>
-            <div class="social-link pt-3 pt-md-0">
-                <ul class="media-list list-unstyled d-flex p-0 m-0">
-                    <li class="me-3"><span>Follow us :</span></li>
-                    <li class="me-3 d-flex flex-wrap justify-content-center">
-                        <i class="me-2 fab fa-facebook-f"></i>
-                        <span>Facebook</span>
-                    </li>
-                    <li class="me-3 d-flex flex-wrap justify-content-center">
-                        <i class="me-2 fab fa-pinterest-p"></i>
-                        <span>Pinterest</span>
-                    </li>
-                    <li class="d-flex flex-wrap justify-content-center">
-                        <i class="me-2 fab fa-instagram"></i>
-                        <span>Instagram</span>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </div>
-    <div class="footer-bottom mt-5">
-        <div class="bottom-content bg-dark text-center pt-3 pb-3">
-            <p class="m-0 text-white">&copy; Designed By <a href="#0" class="text-white font-bold">Thornior</a></p>
-        </div>
-    </div>
-</footer>
+@include('layouts.footer')
 <!-- footer area ends -->
 
 <!-- All JS -->
 @include('layouts.all_scripts')
+
+@include('layouts.blog_view_count_script')
 
 <script>
     $(document).ready(function () {

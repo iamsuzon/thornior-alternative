@@ -2,6 +2,7 @@
 
 namespace App\Http;
 
+use App\Http\Middleware\ActivityByBlogger;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -66,5 +67,6 @@ class Kernel extends HttpKernel
         'checkinvitetoken' => \App\Http\Middleware\CheckInviteToken::class,
         'hasblog' => \App\Http\Middleware\HasBlog::class,
         'hasblog_nosetup' => \App\Http\Middleware\HasBlogNoSetup::class,
+        'blogger_online' => \App\Http\Middleware\ActivityByBlogger::class,
     ];
 }

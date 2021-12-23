@@ -107,6 +107,9 @@
         <form action="{{route('blogger.blog.post.image.store.5')}}" method="POST"
               enctype="multipart/form-data" name="postForm" onsubmit="return validateForm()">
             @csrf
+
+            <input type="hidden" name="template" value="5">
+
             <div class="top-navbar">
                 <div class="container-fluid">
                     <div class="row">
@@ -175,7 +178,7 @@
                                                 width="100%"/>
                                         </p>
                                         <p id="remove-cover-image" class="text-center" style="display: none;cursor: pointer"
-                                           onclick="removeFeaturedImage(event)">Remove featured image</p>
+                                           onclick="removeFeaturedImage(event)">Remove cover image</p>
                                     </div>
 
                                     <div class="post-title mt-5">
@@ -228,7 +231,7 @@
                                     <!--1-->
                                     <div class="middle-image">
                                         <div class="post-image">
-                                            <p><input type="file" accept="image/*" name="article_image_1" id="headline-image-input-one"
+                                            <p><input type="file" accept="image/*" name="image_1" id="headline-image-input-one"
                                                       onchange="loadImage1(event)" style="display: none;"></p>
                                             <p class="text-center image-label" id="headline-image-label1"><label for="headline-image-input-one"
                                                                                                                  style="cursor: pointer;"><i
@@ -238,8 +241,7 @@
                                                     id="headline-image-file-one" width="100%"/>
                                             </p>
                                             <p id="remove-headline-image1" onclick="removeImage1(event)"
-                                               style="display: none; cursor: pointer;text-align: center">Remove
-                                                first image</p>
+                                               style="display: none; cursor: pointer;text-align: center">Remove image</p>
                                         </div>
                                     </div>
                                     <div class="head-1 mt-4">
@@ -258,7 +260,7 @@
                                     <!--2-->
                                     <div class="middle-image mt-4">
                                         <div class="post-image">
-                                            <p><input type="file" accept="image/*" name="article_image_2" id="headline-image-input-two"
+                                            <p><input type="file" accept="image/*" name="image_2" id="headline-image-input-two"
                                                       onchange="loadImage2(event)" style="display: none;"></p>
                                             <p class="text-center image-label" id="headline-image-label2"><label for="headline-image-input-two"
                                                                                                                  style="cursor: pointer;"><i
@@ -268,8 +270,7 @@
                                                     id="headline-image-file-two" width="100%"/>
                                             </p>
                                             <p id="remove-headline-image2" onclick="removeImage2(event)"
-                                               style="display: none; cursor: pointer;text-align: center">Remove
-                                                first image</p>
+                                               style="display: none; cursor: pointer;text-align: center">Remove image</p>
                                         </div>
                                     </div>
                                     <div class="head-1 mt-4">
@@ -288,7 +289,7 @@
                                     <!--3-->
                                     <div class="middle-image mt-4">
                                         <div class="post-image">
-                                            <p><input type="file" accept="image/*" name="article_image_3" id="headline-image-input-three"
+                                            <p><input type="file" accept="image/*" name="image_3" id="headline-image-input-three"
                                                       onchange="loadImage3(event)" style="display: none;"></p>
                                             <p class="text-center image-label" id="headline-image-label3"><label for="headline-image-input-three"
                                                                                                                  style="cursor: pointer;"><i
@@ -298,8 +299,7 @@
                                                     id="headline-image-file-three" width="100%"/>
                                             </p>
                                             <p id="remove-headline-image3" onclick="removeImage3(event)"
-                                               style="display: none; cursor: pointer;text-align: center">Remove
-                                                first image</p>
+                                               style="display: none; cursor: pointer;text-align: center">Remove image</p>
                                         </div>
                                     </div>
                                     <div class="head-1 mt-4">
@@ -318,7 +318,7 @@
                                     <!--4-->
                                     <div class="middle-image mt-4">
                                         <div class="post-image">
-                                            <p><input type="file" accept="image/*" name="article_image_4" id="headline-image-input-four"
+                                            <p><input type="file" accept="image/*" name="image_4" id="headline-image-input-four"
                                                       onchange="loadImage4(event)" style="display: none;"></p>
                                             <p class="text-center image-label" id="headline-image-label4"><label for="headline-image-input-four"
                                                                                                                  style="cursor: pointer;"><i
@@ -328,8 +328,7 @@
                                                     id="headline-image-file-four" width="100%"/>
                                             </p>
                                             <p id="remove-headline-image4" onclick="removeImage4(event)"
-                                               style="display: none; cursor: pointer;text-align: center">Remove
-                                                first image</p>
+                                               style="display: none; cursor: pointer;text-align: center">Remove image</p>
                                         </div>
                                     </div>
                                     <div class="head-1 mt-4">
@@ -348,7 +347,7 @@
                                     <!--5-->
                                     <div class="middle-image mt-4">
                                         <div class="post-image">
-                                            <p><input type="file" accept="image/*" name="article_image_5" id="headline-image-input-five"
+                                            <p><input type="file" accept="image/*" name="image_5" id="headline-image-input-five"
                                                       onchange="loadImage5(event)" style="display: none;"></p>
                                             <p class="text-center image-label" id="headline-image-label5"><label for="headline-image-input-five"
                                                                                                                  style="cursor: pointer;"><i
@@ -358,8 +357,7 @@
                                                     id="headline-image-file-five" width="100%"/>
                                             </p>
                                             <p id="remove-headline-image5" onclick="removeImage5(event)"
-                                               style="display: none; cursor: pointer;text-align: center">Remove
-                                                first image</p>
+                                               style="display: none; cursor: pointer;text-align: center">Remove image</p>
                                         </div>
                                     </div>
                                     <div class="head-1 mt-4">
@@ -378,7 +376,7 @@
                                     <!--6-->
                                     <div class="middle-image mt-4">
                                         <div class="post-image">
-                                            <p><input type="file" accept="image/*" name="article_image_6" id="headline-image-input-six"
+                                            <p><input type="file" accept="image/*" name="image_6" id="headline-image-input-six"
                                                       onchange="loadImage6(event)" style="display: none;"></p>
                                             <p class="text-center image-label" id="headline-image-label6"><label for="headline-image-input-six"
                                                                                                                  style="cursor: pointer;"><i
@@ -388,8 +386,7 @@
                                                     id="headline-image-file-six" width="100%"/>
                                             </p>
                                             <p id="remove-headline-image6" onclick="removeImage6(event)"
-                                               style="display: none; cursor: pointer;text-align: center">Remove
-                                                first image</p>
+                                               style="display: none; cursor: pointer;text-align: center">Remove image</p>
                                         </div>
                                     </div>
                                     <div class="head-1 mt-4">
@@ -412,7 +409,7 @@
                                 <div class="card-header">Products Background</div>
                                 <div class="card-body">
                                     <div class="post-image">
-                                        <p><input type="file" accept="image/*" name="product_background_image" id="product-bg-image-input"
+                                        <p><input type="file" accept="image/*" name="image_7" id="product-bg-image-input"
                                                   onchange="productBackgroundImage(event)" style="display: none;"></p>
                                         <p id="product-bg-image-label" class="text-center image-label"><label for="product-bg-image-input"
                                                                                                               style="cursor: pointer;"><i

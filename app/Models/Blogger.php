@@ -18,11 +18,15 @@ class Blogger extends Authenticatable
     protected $guard = 'blogger';
 
     protected $fillable = [
-        'name', 'email', 'password','about','region','role','is_approved','has_blog'
+        'name', 'email', 'password','about','region','role','is_approved','has_blog', 'last_seen'
     ];
 
     protected $hidden = [
         'password', 'remember_token',
+    ];
+
+    protected $casts = [
+        'last_seen' => 'datetime',
     ];
 
     public function blog()

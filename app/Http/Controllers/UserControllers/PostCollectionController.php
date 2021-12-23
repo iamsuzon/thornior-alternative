@@ -81,6 +81,7 @@ class PostCollectionController extends Controller
     public function show($slug)
     {
         abort_if(PostCollection::where('slug',$slug)->exists() == false, 404);
+
         $collection['single'] = PostCollection::where('slug',$slug)
                                             ->where('user_id', Auth::guard('web')->user()->id)
                                             ->first();
@@ -91,38 +92,23 @@ class PostCollectionController extends Controller
 
         foreach ($collection_posts as $key => $post)
         {
-            switch ($post->template_id) {
-                case 1:
-                    $template_id = "One";
-                    break;
-                case 2:
-                    $template_id = "Two";
-                    break;
-                case 3:
-                    $template_id = "Three";
-                    break;
-                case 4:
-                    $template_id = "Four";
-                    break;
-                case 5:
-                    $template_id = "Five";
-                    break;
-                case 6:
-                    $template_id = "Six";
-                    break;
-            }
+            $model = 'App\Models\\' . ucfirst($post->template_type);
+            $posts['posts'][$key] = $model::where('id', $post->post_id)->orderBy('created_at', 'desc')->first();
 
-            $model = 'App\Models\\' . $post->template_type . 'PostTemplate' . $template_id;
-            $posts[$key] = $model::where('id', $post->post_id)->orderBy('created_at', 'desc')->get();
+            $posts['posts'][$key]->added_at = $post->created_at;
+        }
 
-            foreach ($posts[$key] as $save_time)
-            {
-                $save_time->added_at = $post->created_at;
+        if (isset($posts['posts']))
+        {
+            $post_index = 0;
+            foreach ($posts['posts'] as $post) {
+                $posts['posts'][$post_index] = $post;
+                $post_index++;
             }
         }
 
         if (isset($posts)) {
-            $collection['collection'] = collect($posts)->sortBy('saved_at')->reverse();
+            $collection['collection'] = collect($posts['posts'])->sortBy('saved_at')->reverse();
         }
         else
         {

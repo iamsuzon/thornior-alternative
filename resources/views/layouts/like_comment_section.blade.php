@@ -178,7 +178,7 @@
                                          @if($comment->user_type == 'blogger')
                                          src="{{asset('upload/blogger/avatar')}}/{{$comment->blogger->image}}"
                                          @elseif($comment->user_type == 'web')
-                                         src="{{asset('upload/blogger/avatar')}}/{{$comment->user->image}}"
+                                         src="{{asset('upload/user/avatar')}}/{{$comment->user->image}}"
                                          @endif
                                          alt="User Avatar"
                                          style="width: 45px;height: 45px">

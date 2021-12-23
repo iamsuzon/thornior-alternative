@@ -114,16 +114,26 @@
                                                             +{{$post->categories->count()-1}}
                                                             more @break @endif  @endforeach</span>
                                                         <span>
-                                                            <a id="dropdownMenuButton{{$post->slug}}" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-ellipsis-h"></i></a>
-                                                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton{{$post->slug}}">
+                                                            <a id="dropdownMenuButton{{$post->slug}}"
+                                                               data-bs-toggle="dropdown" aria-expanded="false"><i
+                                                                    class="fas fa-ellipsis-h" style="cursor: pointer"></i></a>
+                                                            <ul class="dropdown-menu"
+                                                                aria-labelledby="dropdownMenuButton{{$post->slug}}">
                                                                 <li>
-                                                                    <form action="{{route('blogger.blog.post.video.delete', $post->slug)}}" method="POST">
+                                                                    <form
+                                                                        action="@if($post->post_type == 'image') {{route('blogger.blog.post.image.delete', $post->slug)}} @else {{route('blogger.blog.post.video.delete', $post->slug)}} @endif"
+                                                                        method="POST">
                                                                         @csrf
-                                                                        <input type="hidden" name="blogger_id" value="{{$post->blogger_id}}">
-                                                                        <input type="hidden" name="template_type" value="{{$post->post_type}}">
-                                                                        <input type="hidden" name="template_id" value="{{$post->template_id}}">
-                                                                        <input type="hidden" name="post_id" value="{{$post->id}}">
-                                                                        <button type="submit" class="dropdown-item" style="font-size: 15px">Delete</button>
+                                                                        <input type="hidden" name="blogger_id"
+                                                                               value="{{$post->blogger_id}}">
+                                                                        <input type="hidden" name="template_type"
+                                                                               value="{{$post->post_type}}">
+                                                                        <input type="hidden" name="template_id"
+                                                                               value="{{$post->template_id}}">
+                                                                        <input type="hidden" name="post_id"
+                                                                               value="{{$post->id}}">
+                                                                        <button type="submit" class="dropdown-item"
+                                                                                style="font-size: 15px">Delete</button>
                                                                     </form>
                                                                 </li>
                                                             </ul>
@@ -135,7 +145,7 @@
                                                     <a href="{{route('blogger.blog.post.'.$post->post_type.'.show.'.$post->template_id,$post->slug)}}"
                                                        type="button" class="px-2 btn bg-white"><span
                                                             class="text-dark">Show</span></a>
-                                                    <a href="{{route('blogger.blog.post.'.$post->post_type.'.edit.'.$post->template_id,$post->id)}}"
+                                                    <a href="{{route('blogger.blog.post.'.$post->post_type.'.edit.'.$post->template_id,$post->slug)}}"
                                                        type="button" class="px-2 btn"><span>Edit</span></a>
                                                 </div>
                                             </div>
@@ -162,7 +172,29 @@
                                                         class="cat-btn text-capitalize">@foreach($post->categories as $category) {{$category->name}} @if($post->categories->count() > 1)
                                                             +{{$post->categories->count()-1}}
                                                             more @break @endif  @endforeach</span>
-                                                        <span><i class="fas fa-ellipsis-h"></i></span>
+                                                        <span>
+                                                            <a id="dropdownMenuButton{{$post->slug}}"
+                                                               data-bs-toggle="dropdown" aria-expanded="false"
+                                                               style="cursor: pointer"><i class="fas fa-ellipsis-h"></i></a>
+                                                            <ul class="dropdown-menu"
+                                                                aria-labelledby="dropdownMenuButton{{$post->slug}}">
+                                                                <li>
+                                                                    <form
+                                                                        action="{{route('blogger.blog.post.image.delete',$post->slug)}}"
+                                                                        method="POST">
+                                                                        @csrf
+                                                                        <input type="hidden" name="blogger_id"
+                                                                               value="{{$post->blogger_id}}">
+                                                                        <input type="hidden" name="template_type"
+                                                                               value="{{$post->post_type}}">
+{{--                                                                        <input type="hidden" name="template_id" value="{{$video->template_id}}">--}}
+                                                                        {{--                                                                        <input type="hidden" name="post_id" value="{{$video->slug}}">--}}
+                                                                        <button type="submit" class="dropdown-item"
+                                                                                style="font-size: 15px">Delete</button>
+                                                                    </form>
+                                                                </li>
+                                                            </ul>
+                                                        </span>
                                                     </div>
                                                     <p>{{substr($post->title,0,60)}}{{((strlen($post->title)) > 60) ? '...' : ''}}</p>
                                                 </div>
@@ -170,7 +202,7 @@
                                                     <a href="{{route('blogger.blog.post.'.$post->post_type.'.show.'.$post->template_id,$post->slug)}}"
                                                        type="button" class="px-2 btn bg-white"><span
                                                             class="text-dark">Show</span></a>
-                                                    <a href="{{route('blogger.blog.post.'.$post->post_type.'.edit.'.$post->template_id,$post->id)}}"
+                                                    <a href="{{route('blogger.blog.post.'.$post->post_type.'.edit.'.$post->template_id,$post->slug)}}"
                                                        type="button" class="px-2 btn"><span>Edit</span></a>
                                                 </div>
                                             </div>
@@ -200,22 +232,34 @@
                                                             class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
                                                             <div class="modal-content">
                                                                 <div class="modal-header">
-                                                                    <h5 class="modal-title text-uppercase" id="exampleModalLabel">{{$category->name}}</h5>
+                                                                    <h5 class="modal-title text-uppercase"
+                                                                        id="exampleModalLabel">{{$category->name}}</h5>
                                                                     <button type="button" class="btn-close"
                                                                             data-bs-dismiss="modal"
                                                                             aria-label="Close"></button>
                                                                 </div>
                                                                 <div class="modal-body">
-                                                                        @foreach($category_post as $post)
-                                                                            @if($post->category_id != $category->id)
-                                                                                @continue
-                                                                            @endif
-                                                                            <div class="card @if($loop->index != 0) mt-4 @endif">
+                                                                    @foreach($category_post as $post)
+                                                                        @if($post->category_id != $category->id)
+                                                                            @continue
+                                                                        @endif
+                                                                            <style>
+                                                                                .cat_post:hover{
+                                                                                    background-color: #e9ecef;
+                                                                                }
+                                                                            </style>
+                                                                        <div
+                                                                            class="card @if($loop->index != 0) mt-4 @endif">
+                                                                            <a class="cat_post" href="{{route('blogger.blog.post.'.$post->post_type.'.show.'.$post->template_id,$post->slug)}}" target="_blank">
                                                                                 <div class="card-body p-0">
                                                                                     <div class="row">
                                                                                         <div class="col-3">
-                                                                                            <div class="image" style="width: 100%;height: 100%">
-                                                                                                <img src="{{asset($post->medias[0]->address)}}" alt="" style="width: 100%;height: 100%">
+                                                                                            <div class="image"
+                                                                                                 style="width: 100%;height: 100%">
+                                                                                                <img
+                                                                                                    src="{{asset($post->medias[0]->address)}}"
+                                                                                                    alt=""
+                                                                                                    style="width: 100%;height: 100%">
                                                                                             </div>
                                                                                         </div>
                                                                                         <div class="col-7">
@@ -231,11 +275,13 @@
                                                                                         </div>
                                                                                     </div>
                                                                                 </div>
-                                                                            </div>
-                                                                        @endforeach
+                                                                            </a>
+                                                                        </div>
+                                                                    @endforeach
                                                                 </div>
                                                                 <div class="modal-footer">
-                                                                    <button type="button" class="btn btn-secondary btn-sm"
+                                                                    <button type="button"
+                                                                            class="btn btn-secondary btn-sm"
                                                                             data-bs-dismiss="modal">Close
                                                                     </button>
                                                                 </div>
@@ -272,16 +318,24 @@
                                                             +{{$video->categories->count()-1}}
                                                             more @break @endif  @endforeach</span>
                                                         <span>
-                                                            <a id="dropdownMenuButton{{$video->slug}}" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer"><i class="fas fa-ellipsis-h"></i></a>
-                                                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton{{$video->slug}}">
+                                                            <a id="dropdownMenuButton{{$video->slug}}"
+                                                               data-bs-toggle="dropdown" aria-expanded="false"
+                                                               style="cursor: pointer"><i class="fas fa-ellipsis-h"></i></a>
+                                                            <ul class="dropdown-menu"
+                                                                aria-labelledby="dropdownMenuButton{{$video->slug}}">
                                                                 <li>
-                                                                    <form action="{{route('blogger.blog.post.video.delete',$video->slug)}}" method="POST">
+                                                                    <form
+                                                                        action="{{route('blogger.blog.post.video.delete',$video->slug)}}"
+                                                                        method="POST">
                                                                         @csrf
-                                                                        <input type="hidden" name="blogger_id" value="{{$video->blogger_id}}">
-                                                                        <input type="hidden" name="template_type" value="{{$video->post_type}}">
+                                                                        <input type="hidden" name="blogger_id"
+                                                                               value="{{$video->blogger_id}}">
+                                                                        <input type="hidden" name="template_type"
+                                                                               value="{{$video->post_type}}">
 {{--                                                                        <input type="hidden" name="template_id" value="{{$video->template_id}}">--}}
-{{--                                                                        <input type="hidden" name="post_id" value="{{$video->slug}}">--}}
-                                                                        <button type="submit" class="dropdown-item" style="font-size: 15px">Delete</button>
+                                                                        {{--                                                                        <input type="hidden" name="post_id" value="{{$video->slug}}">--}}
+                                                                        <button type="submit" class="dropdown-item"
+                                                                                style="font-size: 15px">Delete</button>
                                                                     </form>
                                                                 </li>
                                                             </ul>
@@ -347,17 +401,20 @@
                                             @endif
                                         </div>
                                         <div class="repl-text">
-                                            @php $relation = $comment->template_type.'_post_'.$comment->template_id @endphp
+                                            @php
+                                                $relation = $comment->template_type;
+                                             @endphp
+
                                             @if($comment->user_type == 'blogger')
                                                 <h6>{{$comment->blogger->name}}</h6>
                                                 <p>{{$comment->comment}}</p>
-                                                <a href="{{route('post.show',['template_type' => $comment->template_type ,'template_id' => $comment->template_id,'slug' => $comment->$relation->slug])}}">
+                                                <a href="{{route('post.show',['template_type' => $comment->template_type , 'slug' => $comment->$relation->slug])}}">
                                                     <span><i class="fa fa-comment-alt"></i></span><span>Reply</span>
                                                 </a>
                                             @elseif($comment->user_type == 'web')
                                                 <h6>{{$comment->user->name}}</h6>
                                                 <p>{{$comment->comment}}</p>
-                                                <a href="{{route('post.show',['template_type' => $comment->template_type ,'template_id' => $comment->template_id,'slug' => $comment->$relation->slug])}}">
+                                                <a href="{{route('post.show',['template_type' => $comment->template_type , 'slug' => $comment->$relation->slug])}}">
                                                     <span><i class="fa fa-comment-alt"></i></span><span>Reply</span>
                                                 </a>
                                             @endif
@@ -425,7 +482,7 @@
                                                     @endif
                                                 </div>
                                                 <div class="repl-text">
-                                                    @php $relation = $comment->template_type.'_post_'.$comment->template_id @endphp
+                                                    @php $relation = $comment->template_type @endphp
                                                     @if($comment->user_type == 'blogger')
                                                         <h6 style="margin: 0">@if($comment->blogger->id == Auth::id())
                                                                 You @else {{$comment->blogger->name}} @endif <span
@@ -434,7 +491,7 @@
                                                         <p>{{$comment->comment}} - <span
                                                                 style="font-weight: 400">{{$comment->created_at->diffForHumans()}}</span>
                                                         </p>
-                                                        <a href="{{route('post.show',['template_type' => $comment->template_type ,'template_id' => $comment->template_id,'slug' => $comment->$relation->slug])}}">
+                                                        <a href="{{route('post.show',['template_type' => $comment->template_type, 'slug' => $comment->$relation->slug])}}">
                                                             <span><i class="fa fa-comment-alt"></i></span><span
                                                                 style="margin-left: 5px">Reply</span>
                                                         </a>
@@ -443,7 +500,7 @@
                                                                 style="font-weight: 400">commented on your post</span>
                                                         </h6>
                                                         <p>{{$comment->comment}} - <span></span></p>
-                                                        <a href="{{route('post.show',['template_type' => $comment->template_type ,'template_id' => $comment->template_id,'slug' => $comment->$relation->slug])}}">
+                                                        <a href="{{route('post.show',['template_type' => $comment->template_type , 'slug' => $comment->$relation->slug])}}">
                                                             <span><i class="fa fa-comment-alt"></i></span><span
                                                                 style="margin-left: 5px">Reply</span>
                                                         </a>
@@ -467,7 +524,7 @@
 
                 <div class="wizard-title mt-5">
                     <h4>Latest Post</h4>
-{{--                    <a href="#">See All</a>--}}
+                    {{--                    <a href="#">See All</a>--}}
                 </div>
                 <div class="wizard-body">
                     <ul class="blog-item">

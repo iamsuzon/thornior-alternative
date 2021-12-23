@@ -109,6 +109,9 @@
         <form action="{{route('blogger.blog.post.image.store.3')}}" method="POST"
               enctype="multipart/form-data" name="postForm" onsubmit="return validateForm()">
             @csrf
+
+            <input type="hidden" name="template" value="3">
+
             <div class="top-navbar">
                 <div class="container-fluid">
                     <div class="row">
@@ -214,7 +217,7 @@
                                 <div class="card-body">
                                     <div class="headline-image">
                                         <div class="post-image">
-                                            <p><input type="file" accept="image/*" name="headline_image"
+                                            <p><input type="file" accept="image/*" name="image_1"
                                                       id="headline-image-input"
                                                       onchange="headlineImage(event)" style="display: none;"></p>
                                             <p id="headline-image-label" class="text-center image-label"><label
@@ -228,7 +231,7 @@
                                             </p>
                                             <p id="remove-headline-image" class="text-center"
                                                style="display: none;cursor: pointer"
-                                               onclick="removeHeadlineImage(event)">Remove featured image</p>
+                                               onclick="removeHeadlineImage(event)">Remove image 1</p>
                                         </div>
                                     </div>
                                     <div class="headline-1">
@@ -251,7 +254,7 @@
                                     <!--01-->
                                     <div class="middle-image">
                                         <div class="post-image">
-                                            <p><input type="file" accept="image/*" name="main_article_image_1"
+                                            <p><input type="file" accept="image/*" name="image_2"
                                                       id="main-image-one-input"
                                                       onchange="mainImageOne(event)" style="display: none;"></p>
                                             <p id="main-image-one-label" class="text-center image-label"><label
@@ -265,7 +268,7 @@
                                             </p>
                                             <p id="remove-main-image-one" class="text-center"
                                                style="display: none;cursor: pointer"
-                                               onclick="removeMainImageOne(event)">Remove featured image</p>
+                                               onclick="removeMainImageOne(event)">Remove image 2</p>
                                         </div>
                                     </div>
                                     <div class="head-1 mt-4">
@@ -284,7 +287,7 @@
                                     <!--02-->
                                     <div class="middle-image mt-4">
                                         <div class="post-image">
-                                            <p><input type="file" accept="image/*" name="main_article_image_2"
+                                            <p><input type="file" accept="image/*" name="image_3"
                                                       id="main-image-two-input"
                                                       onchange="mainImageTwo(event)" style="display: none;"></p>
                                             <p id="main-image-two-label" class="text-center image-label"><label
@@ -298,7 +301,7 @@
                                             </p>
                                             <p id="remove-main-image-two" class="text-center"
                                                style="display: none;cursor: pointer"
-                                               onclick="removeMainImageTwo(event)">Remove featured image</p>
+                                               onclick="removeMainImageTwo(event)">Remove image 3</p>
                                         </div>
                                     </div>
                                     <div class="head-1 mt-4">
@@ -317,7 +320,7 @@
                                     <!--03-->
                                     <div class="middle-image mt-4">
                                         <div class="post-image">
-                                            <p><input type="file" accept="image/*" name="main_article_image_3"
+                                            <p><input type="file" accept="image/*" name="image_4"
                                                       id="main-image-three-input"
                                                       onchange="mainImageThree(event)" style="display: none;"></p>
                                             <p id="main-image-three-label" class="text-center image-label"><label
@@ -331,7 +334,7 @@
                                             </p>
                                             <p id="remove-main-image-three" class="text-center"
                                                style="display: none;cursor: pointer"
-                                               onclick="removeMainImageThree(event)">Remove featured image</p>
+                                               onclick="removeMainImageThree(event)">Remove image 4</p>
                                         </div>
                                     </div>
                                     <div class="head-1 mt-4">
@@ -384,7 +387,7 @@
                             <div class="card mt-4">
                                 <div class="card-body">
                                     <div class="post-image">
-                                        <p><input type="file" accept="image/*" name="bottom_image_1"
+                                        <p><input type="file" accept="image/*" name="image_5"
                                                   id="last-image-input-one"
                                                   onchange="loadImage1(event)" style="display: none;"></p>
                                         <p class="text-center image-label" id="last-image-label1"><label
@@ -396,11 +399,10 @@
                                                 id="last-image-file-one" width="100%"/>
                                         </p>
                                         <p id="remove-last-image1" onclick="removeImage1(event)"
-                                           style="display: none; cursor: pointer;text-align: center">Remove
-                                            first image</p>
+                                           style="display: none; cursor: pointer;text-align: center">Remove image</p>
                                     </div>
                                     <div class="post-image mt-5">
-                                        <p><input type="file" accept="image/*" name="bottom_image_2"
+                                        <p><input type="file" accept="image/*" name="image_6"
                                                   id="last-image-input-two"
                                                   onchange="loadImage2(event)" style="display: none;"></p>
                                         <p class="text-center image-label" id="last-image-label2"><label
@@ -412,8 +414,7 @@
                                                 id="last-image-file-two" width="100%"/>
                                         </p>
                                         <p id="remove-last-image2" onclick="removeImage2(event)"
-                                           style="display: none; cursor: pointer;text-align: center">Remove
-                                            second image</p>
+                                           style="display: none; cursor: pointer;text-align: center">Remove image</p>
                                     </div>
                                 </div>
                             </div>

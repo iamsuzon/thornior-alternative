@@ -108,6 +108,9 @@
         <form action="{{route('blogger.blog.post.image.store.2')}}" method="POST"
               enctype="multipart/form-data" name="postForm" onsubmit="return validateForm()">
             @csrf
+
+            <input type="hidden" name="template" value="2">
+
             <div class="top-navbar">
                 <div class="container-fluid">
                     <div class="row">
@@ -223,7 +226,7 @@
                                     <!-- 01 -->
                                     <div class="middle-images">
                                         <div class="post-image">
-                                            <p><input type="file" accept="image/*" name="main_article_image_1"
+                                            <p><input type="file" accept="image/*" name="image_1"
                                                       id="main-image-one-input"
                                                       onchange="mainImageOne(event)" style="display: none;"></p>
                                             <p id="main-image-one-label" class="text-center image-label"><label
@@ -256,7 +259,7 @@
                                     <!-- 02 -->
                                     <div class="middle-images mt-4">
                                         <div class="post-image">
-                                            <p><input type="file" accept="image/*" name="main_article_image_2"
+                                            <p><input type="file" accept="image/*" name="image_2"
                                                       id="main-image-two-input"
                                                       onchange="mainImageTwo(event)" style="display: none;"></p>
                                             <p id="main-image-two-label" class="text-center image-label"><label
@@ -289,7 +292,7 @@
                                     <!-- 03 -->
                                     <div class="middle-images mt-4">
                                         <div class="post-image">
-                                            <p><input type="file" accept="image/*" name="main_article_image_3"
+                                            <p><input type="file" accept="image/*" name="image_3"
                                                       id="main-image-three-input"
                                                       onchange="mainImageThree(event)" style="display: none;"></p>
                                             <p id="main-image-three-label" class="text-center image-label"><label
@@ -322,7 +325,7 @@
                                     <!-- 04 -->
                                     <div class="middle-images mt-4">
                                         <div class="post-image">
-                                            <p><input type="file" accept="image/*" name="main_article_image_4"
+                                            <p><input type="file" accept="image/*" name="image_4"
                                                       id="main-image-four-input"
                                                       onchange="mainImageFour(event)" style="display: none;"></p>
                                             <p id="main-image-four-label" class="text-center image-label"><label
@@ -355,7 +358,7 @@
                                     <!-- 05 -->
                                     <div class="middle-images mt-4">
                                         <div class="post-image">
-                                            <p><input type="file" accept="image/*" name="main_article_image_5"
+                                            <p><input type="file" accept="image/*" name="image_5"
                                                       id="main-image-five-input"
                                                       onchange="mainImageFive(event)" style="display: none;"></p>
                                             <p id="main-image-five-label" class="text-center image-label"><label
@@ -423,7 +426,7 @@
                             <div class="card mt-4">
                                 <div class="card-body">
                                     <div class="post-image">
-                                        <p><input type="file" accept="image/*" name="outro_image" id="outro-image-input"
+                                        <p><input type="file" accept="image/*" name="image_6" id="outro-image-input"
                                                   onchange="outroImage(event)" style="display: none;"></p>
                                         <p class="text-center image-label" id="outro-image-label"><label
                                                 for="outro-image-input"

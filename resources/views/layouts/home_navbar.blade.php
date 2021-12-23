@@ -1,3 +1,81 @@
+<style>
+    .openBtn {
+        border: none;
+        padding: 10px 15px;
+        font-size: 20px;
+        cursor: pointer;
+    }
+    .overlay {
+        height: 100%;
+        width: 100%;
+        display: none;
+        position: fixed;
+        z-index: 9999;
+        top: 0;
+        left: 0;
+        background-color: rgba(0,0,0, 0.9);
+    }
+
+    .overlay-content {
+        position: relative;
+        top: 46%;
+        width: 80%;
+        text-align: center;
+        margin-top: 30px;
+        margin: auto;
+    }
+
+    .overlay .closebtn {
+        position: absolute;
+        top: 20px;
+        right: 45px;
+        font-size: 60px;
+        cursor: pointer;
+        color: white;
+    }
+
+    .overlay .closebtn:hover {
+        color: red;
+    }
+
+    .overlay input[type=text] {
+        padding: 15px;
+        font-size: 17px;
+        border: none;
+        float: left;
+        width: 80%;
+        background: white;
+        border-radius: 5px;
+        border-bottom-right-radius: 0;
+        border-top-right-radius: 0;
+    }
+
+    .overlay input[type=text]:hover {
+        background: #f1f1f1;
+    }
+
+    .overlay input[type=text]:focus {
+        color: #000;
+    }
+
+    .overlay button {
+        float: left;
+        width: 20%;
+        padding: 15px;
+        background: beige;
+        color: black;
+        font-size: 17px;
+        border: none;
+        cursor: pointer;
+        border-bottom-right-radius: 5px;
+        border-top-right-radius: 5px;
+    }
+
+    .overlay button:hover {
+        background: #bbb;
+    }
+</style>
+
 <header>
     <div class="header-main">
         <div class="header-item">
@@ -5,10 +83,24 @@
                 <div class="container">
                     <div class="top-item">
                         <div class="top-search">
-                            <i class="fa fa-search"></i>
+                            <div class="search-icon">
+                                <i class="fa fa-search openBtn" onclick="openSearch()"></i>
+                            </div>
                         </div>
+
+                        <div id="myOverlay" class="overlay">
+                            <span class="closebtn" onclick="closeSearch()" title="Close Overlay">×</span>
+                            <div class="overlay-content">
+                                <form action="{{route('search.post')}}" method="POST">
+                                    @csrf
+                                    <input type="text" placeholder="Search.." name="search">
+                                    <button type="submit"><i class="fa fa-search"></i></button>
+                                </form>
+                            </div>
+                        </div>
+
                         <div class="top-logo">
-                            <a href="#0">
+                            <a href="{{route('index')}}">
                                 <img src="{{asset('backend/assets/images/logo/01.png')}}" alt="Thornior Logo">
                             </a>
                         </div>
@@ -141,3 +233,13 @@
         </div>
     </div>
 </header>
+
+<script>
+    function openSearch() {
+        document.getElementById("myOverlay").style.display = "block";
+    }
+
+    function closeSearch() {
+        document.getElementById("myOverlay").style.display = "none";
+    }
+</script>

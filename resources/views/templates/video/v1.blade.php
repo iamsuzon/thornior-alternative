@@ -130,7 +130,7 @@
     }
 </style>
 <!-- header area start -->
-@include('layouts.posts_navbar')
+
 <!-- header area ends  -->
 
 <!-- page header area start -->
@@ -176,7 +176,7 @@
                 <div class="col-lg-12 col-12">
                     <div class="blog-description my-5">
                         <div class="des-text my-5">
-                            <h4 class="text-center">{{$post['post']->intro_header}}</h4>
+                            <h4 class="text-center">{{$post['post']->intro_heading}}</h4>
                             <p>{{$post['post']->intro_description}}</p>
                         </div>
                         <div class="des-tips">
@@ -310,7 +310,7 @@
         <div class="row">
             <div class="col-lg-12 col-12">
                 <div class="des-text">
-                    <h4 class="text-center">{{$post['post']->outro_header}}</h4>
+                    <h4 class="text-center">{{$post['post']->outro_heading}}</h4>
                     <p class="text-center">{{$post['post']->outro_description}}</p>
                 </div>
             </div>

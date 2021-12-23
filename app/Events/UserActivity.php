@@ -16,19 +16,36 @@ class UserActivity
 
     public $blogger_id;
     public $template_type;
-    public $template_id;
-    public $post_id;
+    public $slug;
+    public $image_id;
+    public $video_id;
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct($blogger_id,$template_type,$template_id,$post_id)
+    public function __construct($blogger_id,$template_type,$slug,$post_id)
     {
         $this->blogger_id = $blogger_id;
         $this->template_type = $template_type;
-        $this->template_id = $template_id;
-        $this->post_id = $post_id;
+        $this->slug = $slug;
+
+        if ($template_type != null AND strtoupper($template_type) == 'IMAGE')
+        {
+            $this->image_id = $post_id;
+            $this->video_id = null;
+        }
+        elseif($template_type != null AND strtoupper($template_type) == 'VIDEO')
+        {
+            $this->image_id = null;
+            $this->video_id = $post_id;
+        }
+        else
+        {
+            $this->image_id = null;
+            $this->video_id = null;
+        }
+
     }
 
     /**

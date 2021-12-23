@@ -124,9 +124,8 @@
         }
     }
 </style>
-<!-- header area start -->
-{{--@include('layouts.posts_navbar')--}}
-<!-- header area ends  -->
+
+@php $index=0; @endphp
 
 <!-- page header area start -->
 <section class="page-header">
@@ -139,7 +138,7 @@
                 @endforeach
             </div>
             <h3 id="post_title">{{$post['post']->title}}</h3>
-            <span><img class="rounded-circle" src="{{asset('backend/assets/images/blog/card/01.jpg')}}" width="20px"
+            <span><img class="rounded-circle" src="{{asset('upload/blogger/avatar')}}/{{$post['post']->blogger->image}}" width="20px"
                        height="20px">{{$post['post']->blogger->name}}</span>
             <span class="ms-4">{{$post['post']->created_at->format('M d, Y')}}</span>
             <span class="ms-4"><i class="fa fa-clock me-2"></i>{{$post['post']->created_at->diffForHumans()}}</span>
@@ -154,7 +153,7 @@
         <div class="video-position">
             <div class="overlay"></div>
             <div class="video-thumb image-thumb">
-                <img src="{{asset($post['post']->medias[0]->address)}}" alt="">
+                <img src="{{asset($post['post']->medias[$index]->address)}}" @php $index++ @endphp alt="">
             </div>
         </div>
     </div>
@@ -175,9 +174,13 @@
                         <div class="des-tips">
                             <div class="row">
                                 <div class="col-lg-6 col-md-6 col-sm-12">
+                                    @if(isset($post['post']->medias[$index]) AND $post['post']->medias[$index]->number == '1')
                                     <img class="rounded"
-                                         src="{{asset($post['post']->medias[1]->address)}}"
+                                         src="
+                                         {{asset($post['post']->medias[$index]->address)}}
+                                         @php $index++ @endphp"
                                          alt="">
+                                    @endif
                                 </div>
                                 <div class="col-lg-5 col-md-5 col-sm-12 offset-lg-1 offset-md-1">
                                     <div class="list my-3">
@@ -239,13 +242,25 @@
         <div class="des-thumb">
             <div class="row">
                 <div class="image-box col-lg-4 col-md-4 col-sm-4 p-0">
-                    <img src="{{asset('upload/blogger_image_post')}}/{{$post['post']->image1}}" alt="">
+                    <img src="
+                    @if(isset($post['post']->medias[$index]) AND $post['post']->medias[$index]->number == '2')
+                    {{asset($post['post']->medias[$index]->address)}}
+                    @php $index++ @endphp
+                    @endif" alt="">
                 </div>
                 <div class="image-box col-lg-4 col-md-4 col-sm-4 p-0">
-                    <img src="{{asset('upload/blogger_image_post')}}/{{$post['post']->image2}}" alt="">
+                    <img src="
+                    @if(isset($post['post']->medias[$index]) AND $post['post']->medias[$index]->number == '3')
+                    {{asset($post['post']->medias[$index]->address)}}
+                    @php $index++ @endphp
+                    @endif" alt="">
                 </div>
                 <div class="image-box col-lg-4 col-md-4 col-sm-4 p-0">
-                    <img src="{{asset('upload/blogger_image_post')}}/{{$post['post']->image3}}" alt="">
+                    <img src="
+                    @if(isset($post['post']->medias[$index]) AND $post['post']->medias[$index]->number == '4')
+                    {{asset($post['post']->medias[$index]->address)}}
+                    @php $index++ @endphp
+                    @endif" alt="">
                 </div>
             </div>
         </div>

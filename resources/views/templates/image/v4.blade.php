@@ -143,79 +143,10 @@
 </style>
 
 <!-- header area start -->
-<header>
-    <div class="header-main">
-        <div class="header-item style-one">
-            <div class="header-top">
-                <div class="container">
-                    <div class="top-item">
-                        <div class="top-search">
-                            <i class="fa fa-search"></i>
-                        </div>
-                        <div class="top-logo">
-                            <a href="{{route('index')}}">
-                                <img src="{{asset('backend/assets/images/logo/01.png')}}" alt="Thornior Logo">
-                            </a>
-                        </div>
-                        <div class="top-menu">
-                            <ul class="top-list">
-                                <li class="d-none d-md-block">
-                                    <select class="form-select" id="inputGroupSelect01">
-                                        <option selected="">EN</option>
-                                        <option value="1">BN</option>
-                                        <option value="2">SP</option>
-                                        <option value="3">TR</option>
-                                    </select>
-                                </li>
-                                <li>
-                                    <a href="#0" class="d-none d-sm-block">Login</a>
-                                    <a href="#0" class="d-sm-none"><i class="fa fa-user-circle"></i></a>
-                                </li>
-                                <li class="">
-                                    <button type="button"><i class="fa fa-shopping-cart"></i></button>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="header-bottom">
-                <div class="container">
-                    <div class="bottom-inner">
-                        <div class="header-logo d-lg-none">
-                            <a href="../index.html">
-                                <img src="../assets/images/logo/01.png" alt="Thornior Logo">
-                            </a>
-                        </div>
-                        <div class="main-menu">
-                            <div class="crose-menu">
-                                <i class="crose-bar fa fa-times-circle"></i>
-                            </div>
-                            <ul class="menu-list">
-                                <li class="active"><a href="#0">Home</a></li>
-                                <li>
-                                    <a href="#0">Categories</a>
-                                </li>
-                                <li><a href="#0">Creators</a></li>
-                                <li>
-                                    <a href="#0">Shop</a>
-                                </li>
-                                <li><a href="#0">Brands</a></li>
-                                <li><a href="#0">About</a></li>
-                            </ul>
-                        </div>
-                        <div class="mobile-bar">
-                            <span></span>
-                            <span></span>
-                            <span></span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</header>
+
 <!-- header area ends  -->
+
+@php $index=0; @endphp
 
 <section id="top-section">
     <!-- Blog video banner start -->
@@ -224,7 +155,9 @@
             <div class="video-position">
                 <div class="overlay"></div>
                 <div class="video-thumb image-thumb">
-                    <img src="{{asset('upload/blogger_image_post')}}/{{$post['post']->fimage}}" alt="">
+                    <img src="{{asset($post['post']->medias[$index]->address)}}
+                         @php $index++ @endphp"
+                         alt="">
                 </div>
             </div>
         </div>
@@ -265,10 +198,18 @@
                 <div class="col-lg-6 col-md-6 col-sm-12">
                     <div class="row gy-3 two-image">
                         <div class="col-lg-6 col-md-6 col-sm-12 px-1">
-                            <img class="rounded" src="{{asset('upload/blogger_image_post')}}/{{$post['post']->article_image1}}" alt="">
+                            <img class="rounded" src="
+                            @if(isset($post['post']->medias[$index]) AND $post['post']->medias[$index]->number == '1')
+                            {{asset($post['post']->medias[$index]->address)}}
+                            @php $index++ @endphp
+                            @endif" alt="">
                         </div>
                         <div class="col-lg-6 col-md-6 col-sm-12 px-1">
-                            <img class="rounded" src="{{asset('upload/blogger_image_post')}}/{{$post['post']->article_image2}}" alt="">
+                            <img class="rounded" src="
+                            @if(isset($post['post']->medias[$index]) AND $post['post']->medias[$index]->number == '2')
+                            {{asset($post['post']->medias[$index]->address)}}
+                            @php $index++ @endphp
+                            @endif" alt="">
                         </div>
                     </div>
                 </div>
@@ -287,13 +228,21 @@
                 <p class="mt-2 lh-lg">{{$post['post']->description2}}</p>
             </div>
             <div class="col-lg-4 col-md-4 col-sm-12 offset-lg-1 offset-md-1">
-                <img class="rounded" src="{{asset('upload/blogger_image_post')}}/{{$post['post']->article_image3}}" alt="">
+                <img class="rounded" src="
+                @if(isset($post['post']->medias[$index]) AND $post['post']->medias[$index]->number == '3')
+                {{asset($post['post']->medias[$index]->address)}}
+                @php $index++ @endphp
+                @endif" alt="">
             </div>
         </div>
 
         <div class="row flex-column-reverse flex-lg-row mt-5">
             <div class="col-lg-4 col-md-4 col-sm-12">
-                <img class="rounded" src="{{asset('upload/blogger_image_post')}}/{{$post['post']->article_image4}}" alt="">
+                <img class="rounded" src="
+                @if(isset($post['post']->medias[$index]) AND $post['post']->medias[$index]->number == '4')
+                {{asset($post['post']->medias[$index]->address)}}
+                @php $index++ @endphp
+                @endif" alt="">
             </div>
             <div class="col-lg-7 col-md-7 col-sm-12 offset-lg-1 offset-md-1 my-5">
                 <h3>{{$post['post']->headline3}}</h3>
@@ -308,13 +257,25 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-lg-4 col-md-4 col">
-                <img class="rounded" src="{{asset('upload/blogger_image_post')}}/{{$post['post']->bottom_image1}}" alt="">
+                <img class="rounded" src="
+                @if(isset($post['post']->medias[$index]) AND $post['post']->medias[$index]->number == '5')
+                {{asset($post['post']->medias[$index]->address)}}
+                @php $index++ @endphp
+                @endif" alt="">
             </div>
             <div class="col-lg-4 col-md-4 col">
-                <img class="rounded" src="{{asset('upload/blogger_image_post')}}/{{$post['post']->bottom_image2}}" alt="">
+                <img class="rounded" src="
+                @if(isset($post['post']->medias[$index]) AND $post['post']->medias[$index]->number == '6')
+                {{asset($post['post']->medias[$index]->address)}}
+                @php $index++ @endphp
+                @endif" alt="">
             </div>
             <div class="col-lg-4 col-md-4 col">
-                <img class="rounded" src="{{asset('upload/blogger_image_post')}}/{{$post['post']->bottom_image3}}" alt="">
+                <img class="rounded" src="
+                @if(isset($post['post']->medias[$index]) AND $post['post']->medias[$index]->number == '7')
+                {{asset($post['post']->medias[$index]->address)}}
+                @php $index++ @endphp
+                @endif" alt="">
             </div>
         </div>
     </div>

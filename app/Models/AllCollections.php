@@ -78,4 +78,14 @@ class AllCollections extends Model
     {
         return $this->hasOne(VideoPostTemplateSix::class, 'post_id');
     }
+
+    public function video()
+    {
+        return $this->hasOne(Video::class, 'id', 'post_id');
+    }
+
+    public function image()
+    {
+        return $this->hasOne(Image::class, 'id', 'post_id');
+    }
 }

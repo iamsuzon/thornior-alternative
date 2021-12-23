@@ -1,3 +1,9 @@
+<style>
+    .main-content .vertical-sidebar .sidebar-content .seller-thumb .text-thumb span::before{
+        background: green;
+    }
+</style>
+
 <div class="vertical-sidebar" id="slideNav">
     <div class="sidebar-content">
         <div class="brand-logo">
@@ -30,7 +36,7 @@
         <div class="sidebar-menu">
             <ul class="menu-list">
                 <div class="menu-title">
-                    <p>Meny</p>
+                    <p>Menu</p>
                 </div>
                 <li><a href="{{route('blogger.overview')}}" @if(Route::currentRouteName() == 'blogger.overview')class="active" @endif><span><i class="fas fa-th-large"></i></span><span>Overview</span></a></li>
                 <li><a href="{{route('blogger.dashboard')}}" @if(Route::currentRouteName() == 'blogger.dashboard')class="active" @endif><span><i class="fab fa-blogger-b"></i></span><span>Blog</span></a></li>
@@ -50,7 +56,7 @@
                         </ul>
                     </div> -->
                 </li>
-                <li><a href="{{route('blogger.settings.blog')}}" @if(Route::currentRouteName() == 'blogger.settings.blog')class="active" @endif><span><i class="fas fa-cog"></i></span><span>Settings</span></a></li>
+                <li><a href="{{route('blogger.settings.blog')}}" @if(Route::currentRouteName() == 'blogger.settings.blog')class="active" @endif><span><i class="fas fa-cog"></i></span><span>Blog Settings</span></a></li>
 {{--                <div class="menu-title">--}}
 {{--                    <p>Create</p>--}}
 {{--                </div>--}}

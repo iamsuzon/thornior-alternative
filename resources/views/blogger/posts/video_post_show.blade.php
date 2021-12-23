@@ -18,6 +18,9 @@
         font-size: 30px;
     }
 </style>
+
+@include('layouts.home_navbar')
+
 <!-- post top navbar start -->
 @include('templates.video.v'.$post['post']->template_id)
 <!-- Edit area ends  -->

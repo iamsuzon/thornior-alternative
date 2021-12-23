@@ -78,4 +78,14 @@ class Comments extends Model
     {
         return $this->belongsTo(VideoPostTemplateSix::class, 'post_id');
     }
+
+    public function image()
+    {
+        return $this->belongsTo(Image::class, 'image_id', 'id');
+    }
+
+    public function video()
+    {
+        return $this->belongsTo(Video::class, 'video_id', 'id');
+    }
 }

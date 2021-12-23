@@ -22,16 +22,15 @@
             @endif
 
         @if(isset($posts) AND array_key_exists('saved_posts',$posts))
-            @forelse($posts['saved_posts'] as $posts)
-                @foreach($posts as $key => $post)
+            @forelse($posts['saved_posts'] as $key => $post)
                     <div class="col-md-3 col-sm-3 col-12 mt-4 mr-sm-0">
                         <div class="blog-item">
                             <div class="item-thumb" style="height: 200px">
-                                <img src="{{asset('upload/blogger_image_post')}}/{{$post->fimage}}" class="rounded"
+                                <img src="{{asset($post->medias[0]->address)}}" class="rounded"
                                      alt="" style="height: 200px;position: relative">
                                 @if(isset($post->video))
                                     <div class="video-btn">
-                                        <a href="{{route('post.show',['template_type' => $post->post_type ,'template_id' => $post->template_id,'slug' => $post->slug])}}">
+                                        <a href="{{route('post.show',['template_type' => $post->post_type , 'slug' => $post->slug])}}">
                                             <i class="fa fa-play"></i>
                                         </a>
                                     </div>
@@ -114,7 +113,7 @@
                                         <span class="rounded bg-white text-dark">CN: {{$post->collection->collection_slug}}</span>
                                     @endif
                                 </div>
-                                <a href="{{route('post.show',['template_type' => $post->post_type ,'template_id' => $post->template_id,'slug' => $post->slug])}}">
+                                <a href="{{route('post.show',['template_type' => $post->post_type , 'slug' => $post->slug])}}">
                                     <h5>{{$post->title}}</h5>
                                 </a>
                             </div>
@@ -128,7 +127,6 @@
                             </div>
                         </div>
                     </div>
-                @endforeach
             @empty
                 <p class="text-center">No Post Available</p>
             @endforelse

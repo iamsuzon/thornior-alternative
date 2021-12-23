@@ -4,9 +4,15 @@ namespace App\Http\Controllers\BloggerControllers;
 
 use App\Events\UserActivity;
 use App\Http\Controllers\Controller;
+use App\Models\AllCollections;
 use App\Models\BloggerProduct;
 use App\Models\AllPost;
+use App\Models\FollowBlogger;
+use App\Models\Like;
+use App\Models\NotifyAdmin;
+use App\Models\SavePost;
 use App\Models\Video;
+use App\Models\View;
 use App\Services\Blogger\AddImages;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -182,12 +188,12 @@ class VideoPostController extends Controller
             foreach ($products as $product) {
                 $product->post_id = $videoPost->id;
                 $product->post_type = 'video';
-                $product->template_id = $videoPost->template_id;
+                $product->post_slug = $videoPost->slug;
                 $product->save();
             }
         }
 
-        event(new UserActivity($videoPost->blogger_id, $videoPost->post_type, $videoPost->template_id, $videoPost->id));
+        event(new UserActivity($videoPost->blogger_id, $videoPost->post_type, $videoPost->slug, $videoPost->id));
 
         if ($request->post_status == 0) {
             return response()->json([
@@ -204,7 +210,9 @@ class VideoPostController extends Controller
     public function show($slug)
     {
         $post['post'] = Video::where('slug', $slug)->where('blogger_id', Auth::guard('blogger')->id())->first();
-        $post['products'] = BloggerProduct::where('blogger_id', Auth::guard('blogger')->id())->get();
+        $post['products'] = BloggerProduct::where('blogger_id', Auth::guard('blogger')->id())
+            ->where('post_slug',$post['post']->slug)
+            ->get();
 
         return view('blogger.posts.video_post_show', compact('post'));
     }
@@ -219,7 +227,7 @@ class VideoPostController extends Controller
 
         $post['products'] = BloggerProduct::where('blogger_id', Auth::guard('blogger')->id())
             ->where('post_id',$post['post']->id)
-            ->where('template_id',$post['post']->template_id)
+            ->where('post_slug',$post['post']->slug)
             ->get();
 
         $ColorData = null;
@@ -395,12 +403,50 @@ class VideoPostController extends Controller
 
         foreach ($post->medias as $media)
         {
-            unlink($media->address);
+            unlink($media->address); // Image
         }
 
-        unlink($post->address);
+        unlink($post->address); // Video
 
         $post->categories()->detach();
+
+        $likes = Like::where('template_type', $post->template_type)
+            ->where('post_id', $post->id)
+            ->get();
+
+        if ($likes != null)
+        {
+            foreach ($likes as $like)
+            {
+                $like->delete();
+            }
+        }
+
+        // comments will auto delete
+
+        $saves = SavePost::where('template_type', $post->template_type)
+            ->where('post_id', $post->id)
+            ->get();
+
+        if ($saves != null)
+        {
+            foreach ($saves as $save)
+            {
+                $save->delete();
+            }
+        }
+
+        $collections = AllCollections::where('template_type', $post->template_type)
+            ->where('post_id', $post->id)
+            ->get();
+
+        if ($collections != null)
+        {
+            foreach ($collections as $collection)
+            {
+                $collection->delete();
+            }
+        }
 
         $post->delete();
 

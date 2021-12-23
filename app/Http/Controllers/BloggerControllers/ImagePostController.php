@@ -4,8 +4,11 @@ namespace App\Http\Controllers\BloggerControllers;
 
 use App\Events\UserActivity;
 use App\Http\Controllers\Controller;
+use App\Models\AllCollections;
 use App\Models\BloggerProduct;
 use App\Models\Image;
+use App\Models\Like;
+use App\Models\SavePost;
 use App\Services\Blogger\AddImages;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -180,7 +183,7 @@ class ImagePostController extends Controller
             foreach ($products as $product) {
                 $product->post_id = $imagePost->id;
                 $product->post_type = 'image';
-                $product->template_id = $imagePost->template_id;
+                $product->post_slug = $imagePost->slug;
                 $product->save();
             }
         }
@@ -202,7 +205,9 @@ class ImagePostController extends Controller
     public function show($slug)
     {
         $post['post'] = Image::where('slug', $slug)->where('blogger_id', Auth::guard('blogger')->id())->first();
-        $post['products'] = BloggerProduct::where('blogger_id', Auth::guard('blogger')->id())->get();
+        $post['products'] = BloggerProduct::where('blogger_id', Auth::guard('blogger')->id())
+            ->where('post_slug', $post['post']->slug)
+            ->get();
 
         return view('blogger.posts.image_post_show', compact('post'));
     }
@@ -217,7 +222,8 @@ class ImagePostController extends Controller
 
         $post['products'] = BloggerProduct::where('blogger_id', Auth::guard('blogger')->id())
             ->where('post_id',$post['post']->id)
-            ->where('template_id',$post['post']->template_id)
+            ->where('post_slug',$post['post']->slug)
+            ->where('post_type',$post['post']->post_type)
             ->get();
 
         $ColorData = null;
@@ -381,7 +387,7 @@ class ImagePostController extends Controller
 
     public function destroy(Request $request,$slug)
     {
-        $post = Video::where('blogger_id',$request->blogger_id)
+        $post = Image::where('blogger_id',$request->blogger_id)
             ->where('slug',$slug)
             ->first();
 
@@ -392,9 +398,45 @@ class ImagePostController extends Controller
             unlink($media->address);
         }
 
-        unlink($post->address);
-
         $post->categories()->detach();
+
+        $likes = Like::where('template_type', $post->template_type)
+            ->where('post_id', $post->id)
+            ->get();
+
+        if ($likes != null)
+        {
+            foreach ($likes as $like)
+            {
+                $like->delete();
+            }
+        }
+
+        // comments will auto delete
+
+        $saves = SavePost::where('template_type', $post->template_type)
+            ->where('post_id', $post->id)
+            ->get();
+
+        if ($saves != null)
+        {
+            foreach ($saves as $save)
+            {
+                $save->delete();
+            }
+        }
+
+        $collections = AllCollections::where('template_type', $post->template_type)
+            ->where('post_id', $post->id)
+            ->get();
+
+        if ($collections != null)
+        {
+            foreach ($collections as $collection)
+            {
+                $collection->delete();
+            }
+        }
 
         $post->delete();
 

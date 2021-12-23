@@ -71,7 +71,7 @@ class Image extends Model
 
     public function comments()
     {
-        return $this->hasMany(Comments::class, 'post_id');
+        return $this->hasMany(Comments::class, 'image_id')->orderBy('created_at');
     }
 
     public function collection()
